@@ -1,0 +1,4 @@
+// Placeholder — route files will be added per feature point.
+// Example:
+//   const authRoutes = require('./auth.routes');
+//   module.exports = { authRoutes };

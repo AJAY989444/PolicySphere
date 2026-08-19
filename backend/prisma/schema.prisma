@@ -1,0 +1,128 @@
+// Prisma Schema for PolicySphere
+// This schema will grow incrementally as features are built.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User & Auth ───────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  phone         String?
+  role          Role     @default(CUSTOMER)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  refreshTokens RefreshToken[]
+  userPolicies  UserPolicy[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+enum Role {
+  CUSTOMER
+  ADVISOR
+  ADMIN
+}
+
+enum InsuranceCategory {
+  HEALTH
+  LIFE
+  MOTOR
+  TRAVEL
+  HOME
+}
+
+enum PolicyStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum ClaimStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+// ─── Insurance Catalog ─────────────────────────────────────
+
+model InsurancePolicy {
+  id             String            @id @default(cuid())
+  name           String
+  provider       String
+  category       InsuranceCategory
+  description    String
+  coverageAmount Float             @map("coverage_amount")
+  premium        Float
+  duration       Int               // duration in months
+  features       Json              @default("[]")
+  isActive       Boolean           @default(true) @map("is_active")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  userPolicies UserPolicy[]
+
+  @@map("insurance_policies")
+}
+
+model UserPolicy {
+  id          String       @id @default(cuid())
+  userId      String       @map("user_id")
+  policyId    String       @map("policy_id")
+  status      PolicyStatus @default(ACTIVE)
+  startDate   DateTime     @default(now()) @map("start_date")
+  endDate     DateTime     @map("end_date")
+  premiumPaid Float        @map("premium_paid")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  policy InsurancePolicy @relation(fields: [policyId], references: [id])
+  claims Claim[]
+
+  @@map("user_policies")
+}
+
+// ─── Claims Management ─────────────────────────────────────
+
+model Claim {
+  id            String      @id @default(cuid())
+  userPolicyId  String      @map("user_policy_id")
+  status        ClaimStatus @default(PENDING)
+  amount        Float
+  description   String
+  incidentDate  DateTime    @map("incident_date")
+  documents     Json        @default("[]")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  userPolicy    UserPolicy  @relation(fields: [userPolicyId], references: [id], onDelete: Cascade)
+
+  @@map("claims")
+}
