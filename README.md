@@ -64,6 +64,23 @@ npm run dev
 - Frontend: http://localhost:5173
 - Backend:  http://localhost:5000
 
+### 5. Testing the Advisor Portal (Admin Panel)
+
+To review, accept, or reject customer claims, you must log in as an administrator. 
+
+You can set up the default admin account by running the setup script:
+
+```bash
+cd backend
+node setupAdmin.js
+```
+
+This will create an admin account (or update it if it exists) with the following credentials:
+- **Email:** `admin@policysphere.com`
+- **Password:** `admin123`
+
+Log in at `http://localhost:5173/login` using these credentials. Once logged in, you will see the **Advisor Portal** link in the top navigation bar where you can review and update claim statuses.
+
 ## License
 
 Private — All rights reserved.
