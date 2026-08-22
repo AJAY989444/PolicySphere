@@ -62,14 +62,45 @@ function Navbar() {
                   Claims
                 </NavLink>
               </li>
+              <li>
+                <NavLink
+                  to="/billing"
+                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Billing
+                </NavLink>
+              </li>
               {(user.role === 'ADVISOR' || user.role === 'ADMIN') && (
+                <>
+                  <li>
+                    <NavLink
+                      to="/advisor"
+                      className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Advisor Portal
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/admin/analytics"
+                      className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Analytics
+                    </NavLink>
+                  </li>
+                </>
+              )}
+              {user.role === 'ADMIN' && (
                 <li>
                   <NavLink
-                    to="/advisor"
+                    to="/admin"
                     className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
                     onClick={() => setMobileOpen(false)}
                   >
-                    Advisor Portal
+                    Admin Panel
                   </NavLink>
                 </li>
               )}

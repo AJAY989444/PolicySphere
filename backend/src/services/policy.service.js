@@ -133,6 +133,101 @@ class PolicyService {
       totalCoverage,
     };
   }
+
+  /**
+   * Get all policies (including inactive) for admin management.
+   */
+  static async getAllPoliciesForAdmin() {
+    return prisma.insurancePolicy.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Create a new policy.
+   */
+  static async createPolicy(data) {
+    return prisma.insurancePolicy.create({
+      data: {
+        name: data.name,
+        provider: data.provider,
+        category: data.category,
+        description: data.description,
+        coverageAmount: parseFloat(data.coverageAmount),
+        premium: parseFloat(data.premium),
+        duration: parseInt(data.duration, 10),
+        features: data.features || [],
+      },
+    });
+  }
+
+  /**
+   * Update an existing policy.
+   */
+  static async updatePolicy(id, data) {
+    const existing = await prisma.insurancePolicy.findUnique({ where: { id } });
+    if (!existing) {
+      const error = new Error('Policy not found');
+      error.status = 404;
+      throw error;
+    }
+
+    const updateData = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.provider !== undefined) updateData.provider = data.provider;
+    if (data.category !== undefined) updateData.category = data.category;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.coverageAmount !== undefined) updateData.coverageAmount = parseFloat(data.coverageAmount);
+    if (data.premium !== undefined) updateData.premium = parseFloat(data.premium);
+    if (data.duration !== undefined) updateData.duration = parseInt(data.duration, 10);
+    if (data.features !== undefined) updateData.features = data.features;
+    if (data.isActive !== undefined) updateData.isActive = Boolean(data.isActive);
+
+    return prisma.insurancePolicy.update({
+      where: { id },
+      data: updateData,
+    });
+  }
+
+  /**
+   * Deactivate a policy (soft delete).
+   */
+  static async deactivatePolicy(id) {
+    const existing = await prisma.insurancePolicy.findUnique({ where: { id } });
+    if (!existing) {
+      const error = new Error('Policy not found');
+      error.status = 404;
+      throw error;
+    }
+
+    return prisma.insurancePolicy.update({
+      where: { id },
+      data: { isActive: false },
+    });
+  }
+
+  /**
+   * Get system wide stats for Admin Dashboard.
+   */
+  static async getAdminDashboardStats() {
+    const [totalUsers, totalPolicies, activePolicies, totalUserPolicies, totalClaims, pendingClaims] = await Promise.all([
+      prisma.user.count(),
+      prisma.insurancePolicy.count(),
+      prisma.insurancePolicy.count({ where: { isActive: true } }),
+      prisma.userPolicy.count(),
+      prisma.claim.count(),
+      prisma.claim.count({ where: { status: 'PENDING' } }),
+    ]);
+
+    return {
+      totalUsers,
+      totalPolicies,
+      activePolicies,
+      totalUserPolicies,
+      totalClaims,
+      pendingClaims,
+    };
+  }
 }
 
 module.exports = PolicyService;

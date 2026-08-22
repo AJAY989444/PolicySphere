@@ -26,6 +26,7 @@ model User {
 
   refreshTokens RefreshToken[]
   userPolicies  UserPolicy[]
+  payments      PaymentTransaction[]
 
   @@map("users")
 }
@@ -102,9 +103,10 @@ model UserPolicy {
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
 
-  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  policy InsurancePolicy @relation(fields: [policyId], references: [id])
-  claims Claim[]
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  policy   InsurancePolicy      @relation(fields: [policyId], references: [id])
+  claims   Claim[]
+  payments PaymentTransaction[]
 
   @@map("user_policies")
 }
@@ -126,3 +128,30 @@ model Claim {
 
   @@map("claims")
 }
+
+// ─── Payments & Billing ────────────────────────────────────
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+model PaymentTransaction {
+  id             String        @id @default(cuid())
+  userId         String        @map("user_id")
+  userPolicyId   String?       @map("user_policy_id")
+  amount         Float
+  currency       String        @default("USD")
+  paymentMethod  String        @map("payment_method") // CARD, NET_BANKING, UPI, PAYPAL
+  paymentStatus  PaymentStatus @default(SUCCESS) @map("payment_status")
+  transactionRef String        @unique @map("transaction_ref")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userPolicy UserPolicy? @relation(fields: [userPolicyId], references: [id])
+
+  @@map("payment_transactions")
+}
+

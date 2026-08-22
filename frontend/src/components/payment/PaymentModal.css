@@ -1,0 +1,228 @@
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.payment-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--space-6);
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Custom Scrollbar for Modal */
+.payment-modal::-webkit-scrollbar {
+  width: 6px;
+}
+.payment-modal::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.payment-modal .close-btn {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: var(--color-bg);
+  border: none;
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.payment-modal .close-btn:hover {
+  color: var(--color-text);
+  background: var(--color-border);
+}
+
+.security-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.75rem;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
+.policy-summary-title {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-5);
+}
+
+/* Credit Card Preview */
+.credit-card-preview {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  color: #ffffff;
+  margin-bottom: var(--space-4);
+  box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 145px;
+}
+
+.card-chip {
+  width: 32px;
+  height: 24px;
+  background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+  border-radius: var(--radius-sm);
+}
+
+.card-logo {
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-align: right;
+  opacity: 0.9;
+}
+
+.card-number {
+  font-size: 1.1rem;
+  font-family: monospace;
+  letter-spacing: 2px;
+  margin: var(--space-2) 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-label {
+  display: block;
+  font-size: 0.65rem;
+  opacity: 0.75;
+  letter-spacing: 0.5px;
+}
+
+.card-val {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Payment Method Tabs */
+.payment-method-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.tab-btn {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.alternative-payment-box {
+  background: var(--color-bg);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  text-align: center;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.alt-icon {
+  font-size: 2rem;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.checkout-summary-box {
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.summary-row.total {
+  border-top: 1px dashed var(--color-border);
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.total-amount {
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.pay-btn {
+  padding: var(--space-3);
+  font-size: 1rem;
+  font-weight: 700;
+}

@@ -6,10 +6,33 @@ const createClaimSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   incidentDate: z.string().transform((str) => new Date(str)),
-  documents: z.array(z.string()).optional(),
+  documents: z.array(z.any()).optional(),
 });
 
 class ClaimController {
+  static async uploadDocuments(req, res, next) {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded.' });
+      }
+
+      const fileData = req.files.map((file) => ({
+        originalName: file.originalname,
+        filename: file.filename,
+        url: `/uploads/claims/${file.filename}`,
+        mimetype: file.mimetype,
+        size: file.size,
+      }));
+
+      return res.status(200).json({
+        message: 'Files uploaded successfully',
+        files: fileData,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async createClaim(req, res, next) {
     try {
       const data = createClaimSchema.parse(req.body);

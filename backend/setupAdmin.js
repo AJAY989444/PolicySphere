@@ -4,39 +4,64 @@ const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
 async function setupRoles() {
-  console.log('Reverting all users back to CUSTOMER role...');
-  await prisma.user.updateMany({
-    data: { role: 'CUSTOMER' }
-  });
+  console.log('Seeding / resetting demo accounts...');
 
-  const adminEmail = 'admin@policysphere.com';
-  console.log(`Setting up Admin user: ${adminEmail}...`);
+  const demoAccounts = [
+    {
+      email: 'admin@policysphere.com',
+      password: 'admin123',
+      firstName: 'System',
+      lastName: 'Admin',
+      role: 'ADMIN',
+    },
+    {
+      email: 'advisor@policysphere.com',
+      password: 'advisor123',
+      firstName: 'Claims',
+      lastName: 'Advisor',
+      role: 'ADVISOR',
+    },
+    {
+      email: 'john.doe@example.com',
+      password: 'user123',
+      firstName: 'John',
+      lastName: 'Doe',
+      role: 'CUSTOMER',
+    },
+  ];
 
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: adminEmail }
-  });
+  for (const account of demoAccounts) {
+    const passwordHash = await bcrypt.hash(account.password, 10);
 
-  if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash('admin123', 10);
-    await prisma.user.create({
-      data: {
-        firstName: 'System',
-        lastName: 'Admin',
-        email: adminEmail,
-        passwordHash: passwordHash,
-        role: 'ADMIN'
-      }
+    const existingUser = await prisma.user.findUnique({
+      where: { email: account.email },
     });
-    console.log('Admin user created successfully.');
-  } else {
-    await prisma.user.update({
-      where: { email: adminEmail },
-      data: { role: 'ADMIN' }
-    });
-    console.log('Admin user already exists. Role set to ADMIN.');
+
+    if (!existingUser) {
+      await prisma.user.create({
+        data: {
+          email: account.email,
+          passwordHash: passwordHash,
+          firstName: account.firstName,
+          lastName: account.lastName,
+          role: account.role,
+        },
+      });
+      console.log(`✅ Created demo account: ${account.email} (${account.role})`);
+    } else {
+      await prisma.user.update({
+        where: { email: account.email },
+        data: {
+          role: account.role,
+          passwordHash: passwordHash,
+        },
+      });
+      console.log(`✅ Reset demo account: ${account.email} (${account.role})`);
+    }
   }
 }
 
 setupRoles()
   .catch(console.error)
   .finally(() => prisma.$disconnect());
+

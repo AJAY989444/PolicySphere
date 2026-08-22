@@ -4,6 +4,7 @@ import { HiArrowLeft, HiShieldCheck, HiClock, HiCurrencyRupee, HiCheckCircle, Hi
 import toast from 'react-hot-toast';
 import api from '../services/api/axios';
 import { useAuth } from '../context/AuthContext';
+import PaymentModal from '../components/payment/PaymentModal';
 import './PolicyDetailPage.css';
 
 function PolicyDetailPage() {
@@ -12,7 +13,7 @@ function PolicyDetailPage() {
   const { user } = useAuth();
   const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchPolicy();
@@ -31,23 +32,13 @@ function PolicyDetailPage() {
     }
   };
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     if (!user) {
       toast.error('Please sign in to purchase a policy');
       navigate('/login');
       return;
     }
-
-    setPurchasing(true);
-    try {
-      await api.post(`/policies/${id}/purchase`);
-      toast.success('Policy purchased successfully!');
-      navigate('/dashboard');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to purchase policy');
-    } finally {
-      setPurchasing(false);
-    }
+    setIsModalOpen(true);
   };
 
   const formatCurrency = (amount) => {
@@ -85,7 +76,13 @@ function PolicyDetailPage() {
 
   if (!policy) return null;
 
-  const features = typeof policy.features === 'string' ? JSON.parse(policy.features) : policy.features;
+  const rawFeatures = policy.features;
+  const features = Array.isArray(rawFeatures)
+    ? rawFeatures
+    : typeof rawFeatures === 'string'
+    ? JSON.parse(rawFeatures)
+    : [];
+
   const durationLabel = policy.duration >= 12
     ? `${Math.floor(policy.duration / 12)} Year${policy.duration >= 24 ? 's' : ''}`
     : `${policy.duration} Month${policy.duration > 1 ? 's' : ''}`;
@@ -189,13 +186,8 @@ function PolicyDetailPage() {
               <button
                 className="btn btn-primary btn-lg purchase-btn"
                 onClick={handlePurchase}
-                disabled={purchasing}
               >
-                {purchasing ? (
-                  <><div className="spinner" style={{ width: 18, height: 18 }}></div> Processing...</>
-                ) : (
-                  <><HiBadgeCheck /> Buy This Plan</>
-                )}
+                <HiBadgeCheck /> Buy This Plan
               </button>
 
               <div className="purchase-trust">
@@ -206,6 +198,16 @@ function PolicyDetailPage() {
           </div>
         </div>
       </div>
+
+      <PaymentModal
+        policy={policy}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          setIsModalOpen(false);
+          navigate('/dashboard');
+        }}
+      />
     </div>
   );
 }

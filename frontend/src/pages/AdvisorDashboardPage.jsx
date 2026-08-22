@@ -3,10 +3,13 @@ import toast from 'react-hot-toast';
 import api from '../services/api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import DocumentViewerModal from '../components/claims/DocumentViewerModal';
+import { HiDocumentText } from 'react-icons/hi';
 
 const AdvisorDashboardPage = () => {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeClaimDocs, setActiveClaimDocs] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -82,6 +85,7 @@ const AdvisorDashboardPage = () => {
                 <th style={{ padding: 'var(--space-3) var(--space-4)', fontWeight: 600 }}>Customer</th>
                 <th style={{ padding: 'var(--space-3) var(--space-4)', fontWeight: 600 }}>Policy</th>
                 <th style={{ padding: 'var(--space-3) var(--space-4)', fontWeight: 600 }}>Amount</th>
+                <th style={{ padding: 'var(--space-3) var(--space-4)', fontWeight: 600 }}>Evidence</th>
                 <th style={{ padding: 'var(--space-3) var(--space-4)', fontWeight: 600 }}>Status</th>
                 <th style={{ padding: 'var(--space-3) var(--space-4)', fontWeight: 600, textAlign: 'right' }}>Actions</th>
               </tr>
@@ -101,6 +105,19 @@ const AdvisorDashboardPage = () => {
                   </td>
                   <td style={{ padding: 'var(--space-4)', fontWeight: 600 }}>
                     ${claim.amount.toLocaleString()}
+                  </td>
+                  <td style={{ padding: 'var(--space-4)' }}>
+                    {claim.documents && claim.documents.length > 0 ? (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: 'var(--color-primary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        onClick={() => setActiveClaimDocs({ docs: claim.documents, title: `Proof Documents - ${claim.userPolicy.user.firstName}'s Claim` })}
+                      >
+                        <HiDocumentText /> View ({claim.documents.length})
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>No Files</span>
+                    )}
                   </td>
                   <td style={{ padding: 'var(--space-4)' }}>
                     {getStatusBadge(claim.status)}
@@ -123,6 +140,15 @@ const AdvisorDashboardPage = () => {
             </tbody>
           </table>
         </div>
+      )}
+
+      {activeClaimDocs && (
+        <DocumentViewerModal
+          isOpen={Boolean(activeClaimDocs)}
+          documents={activeClaimDocs.docs}
+          claimTitle={activeClaimDocs.title}
+          onClose={() => setActiveClaimDocs(null)}
+        />
       )}
     </div>
   );

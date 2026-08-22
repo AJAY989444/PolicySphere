@@ -28,5 +28,9 @@ Thumbs.db
 backend/prisma/*.db
 backend/prisma/migrations/**/migration_lock.toml
 
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
 # Coverage
 coverage/

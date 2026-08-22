@@ -5,13 +5,14 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 const { errorHandler } = require('./middleware/errorHandler');
 const config = require('./config');
 
 const app = express();
 
 // ─── Global Middleware ─────────────────────────────────────
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
   origin: config.corsOrigin,
   credentials: true,
@@ -20,6 +21,9 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Static Files (Uploaded Document Evidence)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ─── Health Check ──────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -36,12 +40,16 @@ const userRoutes = require('./routes/user.routes');
 const policyRoutes = require('./routes/policy.routes');
 const claimRoutes = require('./routes/claim.routes');
 const advisorRoutes = require('./routes/advisor.routes');
+const adminRoutes = require('./routes/admin.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/policies', policyRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/advisor', advisorRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // ─── Error Handler (must be last) ─────────────────────────
 app.use(errorHandler);

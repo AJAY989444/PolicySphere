@@ -12,6 +12,10 @@ import DashboardPage from './pages/DashboardPage';
 import ClaimsPage from './pages/ClaimsPage';
 import SubmitClaimPage from './pages/SubmitClaimPage';
 import AdvisorDashboardPage from './pages/AdvisorDashboardPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import ManagePolicyPage from './pages/ManagePolicyPage';
+import BillingHistoryPage from './pages/BillingHistoryPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 function App() {
   return (
@@ -31,10 +35,21 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="claims" element={<ClaimsPage />} />
           <Route path="claims/new" element={<SubmitClaimPage />} />
+          <Route path="billing" element={<BillingHistoryPage />} />
           <Route path="advisor" element={<AdvisorDashboardPage />} />
         </Route>
-        
-        {/* Future routes will be added here per feature point */}
+
+        {/* Staff & Admin Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'ADVISOR']} />}>
+          <Route path="admin/analytics" element={<AnalyticsPage />} />
+        </Route>
+
+        {/* Admin Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+          <Route path="admin" element={<AdminDashboardPage />} />
+          <Route path="admin/policies/new" element={<ManagePolicyPage />} />
+          <Route path="admin/policies/edit/:id" element={<ManagePolicyPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

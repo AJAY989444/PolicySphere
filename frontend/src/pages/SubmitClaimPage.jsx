@@ -4,8 +4,11 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../services/api/axios';
 
+import FileUpload from '../components/common/FileUpload';
+
 const SubmitClaimPage = () => {
   const [policies, setPolicies] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
@@ -30,7 +33,7 @@ const SubmitClaimPage = () => {
       await api.post('/claims', {
         ...data,
         amount: parseFloat(data.amount),
-        documents: [] // Stub for now
+        documents: uploadedFiles,
       });
       toast.success('Claim submitted successfully!');
       navigate('/claims');
@@ -102,6 +105,14 @@ const SubmitClaimPage = () => {
               })} 
             ></textarea>
             {errors.description && <span className="text-red-500 text-sm">{errors.description.message}</span>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Attach Proof / Evidence (Optional)</label>
+            <FileUpload
+              uploadedFiles={uploadedFiles}
+              onFilesUploaded={(files) => setUploadedFiles(files)}
+            />
           </div>
 
           <button type="submit" disabled={isSubmitting} className="btn btn-primary mt-4">

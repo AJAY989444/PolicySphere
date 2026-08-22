@@ -1,86 +1,129 @@
-# PolicySphere — Digital Insurance Marketplace
+# 🛡️ PolicySphere — Comprehensive Insurance Management System
 
-A full-stack digital insurance marketplace built with React (Vite) and Node.js (Express), backed by PostgreSQL via Prisma ORM.
+PolicySphere is a full-stack, enterprise-grade insurance management platform. It empowers customers to browse multi-category insurance policies, subscribe with automated payment handling, manage active policies, submit claim evidence documents, and track payouts. It also provides dedicated portals for Claims Advisors and System Administrators to review evidence, manage policy catalogs, and analyze business performance metrics.
 
-## Tech Stack
+---
 
-| Layer      | Technology                                  |
-|------------|---------------------------------------------|
-| Frontend   | React.js (Vite), React Router, Axios, Recharts |
-| Backend    | Node.js + Express                           |
-| Database   | PostgreSQL via Prisma ORM                   |
-| Auth       | JWT (access + refresh tokens), bcrypt       |
-| Validation | zod (backend), react-hook-form (frontend)   |
+## 🌟 Key Features
 
-## Project Structure
+### 👤 Customer Portal
+- **Insurance Marketplace**: Interactive catalog filtering across Health, Life, Motor, Travel, and Home insurance plans.
+- **Instant Policy Purchase**: One-click subscription with automated monthly billing calculations.
+- **User Dashboard**: Real-time overview of active policies, upcoming renewal dates, claim statuses, and total coverage.
+- **Claims Evidence Submission**: Drag-and-drop file upload for uploading receipts and claim evidence (`PDF`, `JPG`, `PNG`, `WEBP`) up to 5MB.
+- **Billing & Receipts**: Detailed payment history with receipt viewing and payment status tags.
 
-```
-/frontend    — Vite + React client application
-/backend     — Express + Prisma API server
-README.md    — This file
-PROGRESS.md  — Incremental build log
-.gitignore   — Git ignore rules
-```
+### 🔍 Advisor Portal (`ADVISOR` & `ADMIN` Roles)
+- **Claims Queue Management**: Filter claims by `PENDING`, `IN_REVIEW`, `APPROVED`, or `REJECTED`.
+- **Interactive Evidence Viewer Modal**: Inspect customer-uploaded proof documents and PDFs directly inside the portal without downloading.
+- **Claim Review Action**: Update claim status with custom reviewer notes and instant customer notifications.
 
-## Getting Started
+### ⚙️ Admin & Executive Suite (`ADMIN` Role)
+- **Catalog Policy Management**: Full CRUD operations to create, edit, or deactivate insurance policies.
+- **Executive Analytics Dashboard**: Real-time revenue tracking, category breakdowns, claim approval rate stats, top-performing product rankings, and **Export CSV/JSON** reporting.
+- **One-Click Demo Seeder**: Re-populate or reset demo catalog policies on demand.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend**: React 18, Vite, React Router v6, Axios, React Icons, React Hot Toast, Vanilla CSS Design Tokens (Glassmorphism UI).
+- **Backend**: Node.js, Express.js, Prisma ORM, Neon PostgreSQL, JWT Auth (`jsonwebtoken`), Bcrypt password hashing, Multer file upload, Zod schema validation.
+
+---
+
+## 🚀 Quick Start Guide
 
 ### Prerequisites
+- Node.js (v18+)
+- PostgreSQL database (or Neon Serverless Postgres connection string)
 
-- Node.js >= 18
-- npm >= 9
-- PostgreSQL instance (local or cloud, e.g. Neon / Supabase)
-
-### 1. Install Dependencies
-
-```bash
-# Install all dependencies (frontend + backend)
-npm run install:all
-```
-
-### 2. Configure Environment
-
-Copy the example env files and fill in your values:
-
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
-
-### 3. Set Up the Database
-
+### 1. Backend Setup
 ```bash
 cd backend
-npx prisma migrate dev --name init
-npx prisma generate
+npm install
 ```
 
-### 4. Run Development Servers
-
-```bash
-# From the project root — starts both frontend and backend concurrently
-npm run dev
+Configure `backend/.env`:
+```env
+PORT=5000
+NODE_ENV=development
+DATABASE_URL="postgresql://user:password@ep-sample.aws.neon.tech/policysphere?sslmode=require"
+JWT_SECRET="your_jwt_secret_key"
+FRONTEND_URL="http://localhost:5173"
 ```
 
-- Frontend: http://localhost:5173
-- Backend:  http://localhost:5000
-
-### 5. Testing the Advisor Portal (Admin Panel)
-
-To review, accept, or reject customer claims, you must log in as an administrator. 
-
-You can set up the default admin account by running the setup script:
-
+Run database migrations & seed sample data & demo accounts:
 ```bash
-cd backend
+npx prisma db push
+node prisma/seed.js
 node setupAdmin.js
 ```
 
-This will create an admin account (or update it if it exists) with the following credentials:
-- **Email:** `admin@policysphere.com`
-- **Password:** `admin123`
+Start the backend server:
+```bash
+npm run dev
+```
 
-Log in at `http://localhost:5173/login` using these credentials. Once logged in, you will see the **Advisor Portal** link in the top navigation bar where you can review and update claim statuses.
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## License
+Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
-Private — All rights reserved.
+---
+
+## 🔑 Demo Account Credentials
+
+The system includes pre-seeded demo accounts for testing all user roles:
+
+| Role | Email | Password | Description |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@policysphere.com` | `admin123` | Full access to Policy Management, Analytics, and Seeding |
+| **Advisor** | `advisor@policysphere.com` | `advisor123` | Access to Advisor Claims Queue & Evidence Inspection |
+| **Customer** | `john.doe@example.com` | `user123` | Standard customer account with active policies & claims |
+
+---
+
+## 📡 API Reference Inventory
+
+### Authentication (`/api/auth`)
+- `POST /register`: Register new customer account.
+- `POST /login`: Authenticate user & return JWT cookie/token.
+- `GET /me`: Get current authenticated user profile.
+- `POST /logout`: Invalidate session.
+
+### Policies (`/api/policies`)
+- `GET /`: Retrieve active insurance catalog with filtering and search.
+- `GET /:id`: Fetch detailed policy breakdown.
+
+### Subscriptions & Payments (`/api/policies` & `/api/payments`)
+- `POST /subscribe`: Subscribe to an insurance policy.
+- `GET /my-policies`: Fetch user's active & past subscriptions.
+- `GET /history`: Fetch payment transactions history.
+
+### Claims Management (`/api/claims`)
+- `GET /`: Fetch customer claims list.
+- `POST /`: Submit a new claim with attached evidence documents.
+- `POST /upload`: Upload evidence documents via `multer`.
+
+### Advisor Portal (`/api/advisor`)
+- `GET /claims`: Retrieve all system claims for review.
+- `PATCH /claims/:id/status`: Update claim status (`APPROVED`, `REJECTED`, `IN_REVIEW`) with reviewer notes.
+
+### Admin Suite (`/api/admin`)
+- `GET /stats`: Retrieve system summary stats.
+- `GET /policies`: Retrieve full policy catalog (including deactivated policies).
+- `POST /policies`: Create new policy plan.
+- `PUT /policies/:id`: Edit existing policy.
+- `DELETE /policies/:id`: Deactivate policy.
+- `GET /analytics`: Retrieve executive analytics & financial metrics.
+- `POST /seed-demo`: Re-seed sample catalog policies on demand.
+
+---
+
+## 📄 License
+This project is open source and available under the [MIT License](LICENSE).
