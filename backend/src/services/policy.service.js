@@ -202,13 +202,14 @@ class PolicyService {
         },
         include: { policy: true },
       }),
-      prisma.payment.create({
+      prisma.paymentTransaction.create({
         data: {
+          userId,
           userPolicyId: userPolicy.id,
           amount: finalRenewalPremium,
           paymentMethod: 'RENEWAL_AUTO',
-          transactionId: `TXN-RNW-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-          status: 'SUCCESS',
+          transactionRef: `TXN-RNW-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+          paymentStatus: 'SUCCESS',
         },
       }),
     ]);
