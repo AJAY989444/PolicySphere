@@ -420,5 +420,27 @@ input, select, textarea {
   animation: fadeIn 200ms ease-out;
 }
 
+.close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-hover, #f1f5f9);
+  color: var(--color-text-secondary, #64748b);
+  border: 1px solid var(--color-border, #e2e8f0);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.close-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+  transform: rotate(90deg);
+}
+
 /* ─── Responsive Breakpoints (used in components) ──────── */
 /* sm: 640px, md: 768px, lg: 1024px, xl: 1280px */
