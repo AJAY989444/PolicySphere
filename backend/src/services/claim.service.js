@@ -107,7 +107,29 @@ const updateClaimStatus = async (claimId, status) => {
   const claim = await prisma.claim.update({
     where: { id: claimId },
     data: { status },
+    include: {
+      userPolicy: {
+        select: {
+          userId: true,
+          policy: { select: { name: true } }
+        }
+      }
+    }
   });
+
+  // Trigger Notification for User (SRS 14)
+  if (claim.userPolicy?.userId) {
+    await prisma.notification.create({
+      data: {
+        userId: claim.userPolicy.userId,
+        title: `Claim ${status}`,
+        message: `Your insurance claim for ${claim.userPolicy.policy?.name || 'policy'} of $${claim.amount.toLocaleString()} has been ${status.toLowerCase()}.`,
+        type: 'CLAIM_UPDATE',
+        linkUrl: '/claims',
+      }
+    }).catch(err => console.error('Notification error:', err));
+  }
+
   return claim;
 };
 

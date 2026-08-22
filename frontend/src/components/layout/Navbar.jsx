@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { HiOutlineMenu, HiOutlineX, HiUserCircle } from 'react-icons/hi';
 import { useAuth } from '../../context/AuthContext';
 
+import NotificationCenter from '../common/NotificationCenter';
+
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -112,6 +114,7 @@ function Navbar() {
         <div className="navbar-actions">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <NotificationCenter />
               <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: 'var(--color-text)', textDecoration: 'none' }}>
                 <HiUserCircle size={24} className="text-primary" />
                 <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600, cursor: 'pointer' }}>{user.firstName}</span>

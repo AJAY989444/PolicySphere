@@ -43,6 +43,7 @@ const advisorRoutes = require('./routes/advisor.routes');
 const adminRoutes = require('./routes/admin.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const quoteRoutes = require('./routes/quote.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -52,6 +53,7 @@ app.use('/api/advisor', advisorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/quotes', quoteRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // ─── Error Handler (must be last) ─────────────────────────
 app.use(errorHandler);

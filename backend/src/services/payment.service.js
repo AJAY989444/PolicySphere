@@ -71,6 +71,17 @@ class PaymentService {
         },
       });
 
+      // Trigger In-App Notification (SRS 14)
+      await tx.notification.create({
+        data: {
+          userId,
+          title: 'Policy Purchased Successfully',
+          message: `Your payment of $${policy.premium.toLocaleString()} for ${policy.name} was successful. Transaction Ref: ${transactionRef}`,
+          type: 'PAYMENT_SUCCESS',
+          linkUrl: '/dashboard',
+        },
+      });
+
       return {
         userPolicy,
         transaction,
