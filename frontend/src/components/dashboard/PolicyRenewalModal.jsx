@@ -14,12 +14,16 @@ function PolicyRenewalModal({ isOpen, onClose, userPolicy, onRenewSuccess }) {
       setError('');
       setLoading(false);
     }
-  }, [isOpen, userPolicy]);
+  }, [isOpen]);
 
   const handleCloseModal = () => {
+    const wasSuccess = !!successData;
     setSuccessData(null);
     setError('');
     onClose();
+    if (wasSuccess && onRenewSuccess) {
+      onRenewSuccess();
+    }
   };
 
   if (!isOpen || !userPolicy) return null;
@@ -36,9 +40,6 @@ function PolicyRenewalModal({ isOpen, onClose, userPolicy, onRenewSuccess }) {
     try {
       const response = await api.post(`/policies/my-policies/${userPolicy.id}/renew`);
       setSuccessData(response.data);
-      if (onRenewSuccess) {
-        onRenewSuccess();
-      }
     } catch (err) {
       console.error('Renewal error:', err);
       setError(err.response?.data?.message || err.response?.data?.error || 'Failed to process renewal.');
