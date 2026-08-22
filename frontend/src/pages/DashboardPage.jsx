@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { HiShieldCheck, HiCurrencyRupee, HiCollection, HiTrendingUp, HiArrowRight, HiExternalLink, HiDocumentText } from 'react-icons/hi';
+import { HiShieldCheck, HiCurrencyRupee, HiCollection, HiTrendingUp, HiArrowRight, HiExternalLink, HiDocumentText, HiRefresh } from 'react-icons/hi';
 import api from '../services/api/axios';
 import { useAuth } from '../context/AuthContext';
 import PolicyCertificateModal from '../components/dashboard/PolicyCertificateModal';
+import PolicyRenewalModal from '../components/dashboard/PolicyRenewalModal';
 import './DashboardPage.css';
 
 function DashboardPage() {
@@ -15,6 +16,10 @@ function DashboardPage() {
   // Certificate Modal State
   const [selectedCertPolicyId, setSelectedCertPolicyId] = useState(null);
   const [isCertOpen, setIsCertOpen] = useState(false);
+
+  // Renewal Modal State
+  const [selectedRenewPolicy, setSelectedRenewPolicy] = useState(null);
+  const [isRenewOpen, setIsRenewOpen] = useState(false);
 
   useEffect(() => {
     fetchDashboard();
@@ -187,6 +192,16 @@ function DashboardPage() {
                       <td>
                         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                           <button
+                            className="btn btn-primary btn-sm"
+                            title="Renew Policy & Claim NCB Discount"
+                            onClick={() => {
+                              setSelectedRenewPolicy(up);
+                              setIsRenewOpen(true);
+                            }}
+                          >
+                            <HiRefresh /> Renew
+                          </button>
+                          <button
                             className="btn btn-secondary btn-sm"
                             title="View Official Certificate"
                             onClick={() => {
@@ -234,6 +249,16 @@ function DashboardPage() {
           isOpen={isCertOpen}
           onClose={() => setIsCertOpen(false)}
           userPolicyId={selectedCertPolicyId}
+        />
+
+        {/* Policy Renewal Modal */}
+        <PolicyRenewalModal
+          isOpen={isRenewOpen}
+          onClose={() => setIsRenewOpen(false)}
+          userPolicy={selectedRenewPolicy}
+          onRenewSuccess={() => {
+            fetchDashboard();
+          }}
         />
       </div>
     </div>

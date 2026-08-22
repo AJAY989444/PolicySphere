@@ -1,4 +1,5 @@
 const prisma = require('../config/db');
+const NotificationService = require('./notification.service');
 
 class PolicyService {
   /**
@@ -155,6 +156,78 @@ class PolicyService {
       verificationHash,
       issuedAt: userPolicy.createdAt,
       userPolicy,
+    };
+  }
+
+  /**
+   * Renew an active or expiring policy with No Claim Bonus (NCB) discount calculation.
+   */
+  static async renewUserPolicy(userId, userPolicyId) {
+    const userPolicy = await prisma.userPolicy.findFirst({
+      where: {
+        id: userPolicyId,
+        userId,
+      },
+      include: {
+        policy: true,
+        claims: true,
+      },
+    });
+
+    if (!userPolicy) {
+      const error = new Error('Policy record not found or unauthorized.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // No-Claim Bonus (NCB) logic: 15% discount if 0 claims filed
+    const hasClaims = userPolicy.claims.length > 0;
+    const ncbPercentage = hasClaims ? 0 : 15;
+    const basePremium = userPolicy.policy.premium;
+    const discountAmount = (basePremium * ncbPercentage) / 100;
+    const finalRenewalPremium = basePremium - discountAmount;
+
+    // Extend End Date by policy duration (in months)
+    const currentEnd = new Date(userPolicy.endDate);
+    const newEnd = new Date(currentEnd > new Date() ? currentEnd : new Date());
+    newEnd.setMonth(newEnd.getMonth() + userPolicy.policy.duration);
+
+    // Execute renewal transaction
+    const [updatedUserPolicy, payment] = await prisma.$transaction([
+      prisma.userPolicy.update({
+        where: { id: userPolicyId },
+        data: {
+          endDate: newEnd,
+          status: 'ACTIVE',
+        },
+        include: { policy: true },
+      }),
+      prisma.payment.create({
+        data: {
+          userPolicyId: userPolicy.id,
+          amount: finalRenewalPremium,
+          paymentMethod: 'RENEWAL_AUTO',
+          transactionId: `TXN-RNW-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+          status: 'SUCCESS',
+        },
+      }),
+    ]);
+
+    // System Notification Trigger
+    NotificationService.createNotification({
+      userId,
+      title: 'Policy Renewed Successfully! 🎉',
+      message: `Your ${userPolicy.policy.name} has been renewed until ${newEnd.toLocaleDateString()}. ${ncbPercentage > 0 ? `You saved $${discountAmount.toLocaleString()} with your 15% No-Claim Bonus!` : ''}`,
+      type: 'RENEWAL_REMINDER',
+    }).catch(err => console.error('Notification error:', err));
+
+    return {
+      userPolicy: updatedUserPolicy,
+      payment,
+      ncbPercentage,
+      discountAmount,
+      finalRenewalPremium,
+      extendedUntil: newEnd,
     };
   }
 

@@ -86,6 +86,19 @@ class PolicyController {
   }
 
   /**
+   * POST /api/policies/my-policies/:userPolicyId/renew — 1-click renewal with NCB discount
+   */
+  static async renewPolicy(req, res, next) {
+    try {
+      const { userPolicyId } = req.params;
+      const result = await PolicyService.renewUserPolicy(req.user.id, userPolicyId);
+      res.json({ success: true, message: 'Policy renewed successfully!', ...result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
    * GET /api/policies/dashboard-stats — user's dashboard stats (protected)
    */
   static async getDashboardStats(req, res, next) {

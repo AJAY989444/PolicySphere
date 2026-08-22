@@ -11,7 +11,8 @@ router.get('/my-policies/:userPolicyId/certificate', requireAuth, PolicyControll
 router.get('/dashboard-stats', requireAuth, PolicyController.getDashboardStats);
 router.get('/:id', PolicyController.getById);
 
-// Protected routes — purchase
+// Protected routes — purchase & renewal
+router.post('/my-policies/:userPolicyId/renew', requireAuth, PolicyController.renewPolicy);
 router.post('/:id/purchase', requireAuth, PolicyController.purchase);
 
 module.exports = router;
