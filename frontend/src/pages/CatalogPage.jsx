@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { HiSearch, HiFilter, HiArrowRight, HiShieldCheck } from 'react-icons/hi';
+import { HiSearch, HiFilter, HiArrowRight, HiShieldCheck, HiCalculator, HiScale } from 'react-icons/hi';
 import api from '../services/api/axios';
+import PolicyCompareModal from '../components/catalog/PolicyCompareModal';
+import QuoteEngineModal from '../components/catalog/QuoteEngineModal';
+import toast from 'react-hot-toast';
 import './CatalogPage.css';
 
 const CATEGORIES = [
@@ -26,6 +29,11 @@ function CatalogPage() {
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+
+  // Compare & Quote Engine Modals State
+  const [selectedCompareIds, setSelectedCompareIds] = useState([]);
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isQuoteOpen, setIsQuoteOpen] = useState(false);
 
   useEffect(() => {
     fetchPolicies();
@@ -63,6 +71,20 @@ function CatalogPage() {
     fetchPolicies();
   };
 
+  const toggleCompare = (policyId) => {
+    if (selectedCompareIds.includes(policyId)) {
+      setSelectedCompareIds(selectedCompareIds.filter((id) => id !== policyId));
+    } else {
+      if (selectedCompareIds.length >= 3) {
+        toast.error('You can compare up to 3 policies at a time.');
+        return;
+      }
+      setSelectedCompareIds([...selectedCompareIds, policyId]);
+    }
+  };
+
+  const selectedPoliciesForCompare = policies.filter((p) => selectedCompareIds.includes(p.id));
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -93,6 +115,12 @@ function CatalogPage() {
             </span>
             <h1>Find Your Perfect <span className="text-gradient">Insurance Plan</span></h1>
             <p>Browse through our curated collection of insurance policies from India's top providers. Compare coverage, premiums, and features to find the plan that fits you best.</p>
+            
+            <div className="catalog-hero-actions mt-4">
+              <button className="btn btn-primary" onClick={() => setIsQuoteOpen(true)}>
+                <HiCalculator /> Get Custom Instant Quote
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -157,53 +185,100 @@ function CatalogPage() {
           <>
             <p className="catalog-count">{policies.length} plan{policies.length !== 1 ? 's' : ''} available</p>
             <div className="catalog-grid">
-              {policies.map((policy, index) => (
-                <div
-                  key={policy.id}
-                  className="policy-card animate-fade-in-up"
-                  style={{ animationDelay: `${index * 60}ms` }}
-                >
-                  <div className="policy-card-header">
-                    <span
-                      className="policy-category-badge"
-                      style={{ '--badge-color': getCategoryColor(policy.category) }}
-                    >
-                      {policy.category}
-                    </span>
-                    <span className="policy-provider">{policy.provider}</span>
-                  </div>
-
-                  <h3 className="policy-card-title">{policy.name}</h3>
-                  <p className="policy-card-desc">{policy.description}</p>
-
-                  <div className="policy-card-stats">
-                    <div className="policy-stat">
-                      <span className="policy-stat-label">Coverage</span>
-                      <span className="policy-stat-value">{formatCurrency(policy.coverageAmount)}</span>
+              {policies.map((policy, index) => {
+                const isCompared = selectedCompareIds.includes(policy.id);
+                return (
+                  <div
+                    key={policy.id}
+                    className={`policy-card animate-fade-in-up ${isCompared ? 'card-selected' : ''}`}
+                    style={{ animationDelay: `${index * 60}ms` }}
+                  >
+                    <div className="policy-card-header">
+                      <span
+                        className="policy-category-badge"
+                        style={{ '--badge-color': getCategoryColor(policy.category) }}
+                      >
+                        {policy.category}
+                      </span>
+                      <span className="policy-provider">{policy.provider}</span>
                     </div>
-                    <div className="policy-stat">
-                      <span className="policy-stat-label">Premium</span>
-                      <span className="policy-stat-value premium">{formatCurrency(policy.premium)}<span className="policy-period">/{policy.duration >= 12 ? 'yr' : 'mo'}</span></span>
+
+                    <h3 className="policy-card-title">{policy.name}</h3>
+                    <p className="policy-card-desc">{policy.description}</p>
+
+                    <div className="policy-card-stats">
+                      <div className="policy-stat">
+                        <span className="policy-stat-label">Coverage</span>
+                        <span className="policy-stat-value">{formatCurrency(policy.coverageAmount)}</span>
+                      </div>
+                      <div className="policy-stat">
+                        <span className="policy-stat-label">Premium</span>
+                        <span className="policy-stat-value premium">{formatCurrency(policy.premium)}<span className="policy-period">/{policy.duration >= 12 ? 'yr' : 'mo'}</span></span>
+                      </div>
+                    </div>
+
+                    <div className="policy-card-features">
+                      {(typeof policy.features === 'string' ? JSON.parse(policy.features) : policy.features)
+                        .slice(0, 3)
+                        .map((feature, i) => (
+                          <span key={i} className="policy-feature">✓ {feature}</span>
+                        ))}
+                    </div>
+
+                    <div className="policy-card-actions">
+                      <label className="compare-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={isCompared}
+                          onChange={() => toggleCompare(policy.id)}
+                        /> Compare
+                      </label>
+                      <Link to={`/catalog/${policy.id}`} className="btn btn-primary policy-card-btn">
+                        View Details <HiArrowRight />
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="policy-card-features">
-                    {(typeof policy.features === 'string' ? JSON.parse(policy.features) : policy.features)
-                      .slice(0, 3)
-                      .map((feature, i) => (
-                        <span key={i} className="policy-feature">✓ {feature}</span>
-                      ))}
-                  </div>
-
-                  <Link to={`/catalog/${policy.id}`} className="btn btn-primary policy-card-btn">
-                    View Details <HiArrowRight />
-                  </Link>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}
       </div>
+
+      {/* Floating Compare Action Bar */}
+      {selectedCompareIds.length > 0 && (
+        <div className="compare-floating-bar animate-fade-in-up">
+          <div className="compare-bar-content">
+            <div>
+              <strong>{selectedCompareIds.length}</strong> {selectedCompareIds.length === 1 ? 'Policy' : 'Policies'} Selected for Comparison
+            </div>
+            <div className="compare-bar-actions">
+              <button className="btn btn-secondary btn-sm" onClick={() => setSelectedCompareIds([])}>
+                Clear
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setIsCompareOpen(true)}
+                disabled={selectedCompareIds.length < 2}
+              >
+                <HiScale /> Compare Side-by-Side ({selectedCompareIds.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modals */}
+      <PolicyCompareModal
+        isOpen={isCompareOpen}
+        onClose={() => setIsCompareOpen(false)}
+        policies={selectedPoliciesForCompare}
+      />
+
+      <QuoteEngineModal
+        isOpen={isQuoteOpen}
+        onClose={() => setIsQuoteOpen(false)}
+      />
     </div>
   );
 }

@@ -42,6 +42,7 @@ const claimRoutes = require('./routes/claim.routes');
 const advisorRoutes = require('./routes/advisor.routes');
 const adminRoutes = require('./routes/admin.routes');
 const paymentRoutes = require('./routes/payment.routes');
+const quoteRoutes = require('./routes/quote.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -50,6 +51,7 @@ app.use('/api/claims', claimRoutes);
 app.use('/api/advisor', advisorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/quotes', quoteRoutes);
 
 // ─── Error Handler (must be last) ─────────────────────────
 app.use(errorHandler);
