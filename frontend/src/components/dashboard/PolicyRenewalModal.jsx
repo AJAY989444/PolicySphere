@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HiX, HiRefresh, HiSparkles, HiCheckCircle, HiShieldCheck } from 'react-icons/hi';
 import api from '../../services/api/axios';
 import './PolicyRenewalModal.css';
@@ -7,6 +7,20 @@ function PolicyRenewalModal({ isOpen, onClose, userPolicy, onRenewSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successData, setSuccessData] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSuccessData(null);
+      setError('');
+      setLoading(false);
+    }
+  }, [isOpen, userPolicy]);
+
+  const handleCloseModal = () => {
+    setSuccessData(null);
+    setError('');
+    onClose();
+  };
 
   if (!isOpen || !userPolicy) return null;
 
@@ -50,7 +64,7 @@ function PolicyRenewalModal({ isOpen, onClose, userPolicy, onRenewSuccess }) {
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={handleCloseModal}>
       <div className="renewal-modal-content animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="renewal-modal-header">
@@ -61,7 +75,7 @@ function PolicyRenewalModal({ isOpen, onClose, userPolicy, onRenewSuccess }) {
               <span className="sub">Extend coverage & claim No-Claim Bonus</span>
             </div>
           </div>
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" onClick={handleCloseModal}>
             <HiX />
           </button>
         </div>
@@ -94,7 +108,7 @@ function PolicyRenewalModal({ isOpen, onClose, userPolicy, onRenewSuccess }) {
               </div>
             </div>
 
-            <button className="btn btn-primary w-full" onClick={onClose}>
+            <button className="btn btn-primary w-full" onClick={handleCloseModal}>
               Back to Dashboard
             </button>
           </div>
@@ -154,7 +168,7 @@ function PolicyRenewalModal({ isOpen, onClose, userPolicy, onRenewSuccess }) {
 
             {/* Submit Actions */}
             <div className="renewal-modal-actions">
-              <button className="btn btn-secondary" onClick={onClose} disabled={loading}>
+              <button className="btn btn-secondary" onClick={handleCloseModal} disabled={loading}>
                 Cancel
               </button>
               <button className="btn btn-primary btn-renew-action" onClick={handleConfirmRenewal} disabled={loading}>
