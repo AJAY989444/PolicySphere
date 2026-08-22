@@ -73,6 +73,19 @@ class PolicyController {
   }
 
   /**
+   * GET /api/policies/my-policies/:userPolicyId/certificate — official digital certificate
+   */
+  static async getCertificate(req, res, next) {
+    try {
+      const { userPolicyId } = req.params;
+      const certificate = await PolicyService.getPolicyCertificate(req.user.id, userPolicyId);
+      res.json({ success: true, ...certificate });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
    * GET /api/policies/dashboard-stats — user's dashboard stats (protected)
    */
   static async getDashboardStats(req, res, next) {

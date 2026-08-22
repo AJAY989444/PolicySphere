@@ -114,6 +114,51 @@ class PolicyService {
   }
 
   /**
+   * Get official digital certificate payload for a user policy.
+   */
+  static async getPolicyCertificate(userId, userPolicyId) {
+    const userPolicy = await prisma.userPolicy.findFirst({
+      where: {
+        id: userPolicyId,
+        userId,
+      },
+      include: {
+        policy: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+          },
+        },
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!userPolicy) {
+      const error = new Error('Policy certificate not found or unauthorized.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const cleanId = userPolicy.id.replace(/[^a-zA-Z0-9]/g, '').slice(-8).toUpperCase();
+    const certNumber = `CERT-PS-${cleanId}-2026`;
+    const verificationHash = `PS-VERIFY-${Buffer.from(`${userPolicy.id}:${userPolicy.userId}`).toString('hex').slice(0, 12).toUpperCase()}`;
+
+    return {
+      certificateNumber: certNumber,
+      verificationHash,
+      issuedAt: userPolicy.createdAt,
+      userPolicy,
+    };
+  }
+
+  /**
    * Get dashboard stats for a user.
    */
   static async getUserDashboardStats(userId) {

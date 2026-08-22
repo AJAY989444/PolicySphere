@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { HiShieldCheck, HiCurrencyRupee, HiCollection, HiTrendingUp, HiArrowRight, HiExternalLink } from 'react-icons/hi';
+import { HiShieldCheck, HiCurrencyRupee, HiCollection, HiTrendingUp, HiArrowRight, HiExternalLink, HiDocumentText } from 'react-icons/hi';
 import api from '../services/api/axios';
 import { useAuth } from '../context/AuthContext';
+import PolicyCertificateModal from '../components/dashboard/PolicyCertificateModal';
 import './DashboardPage.css';
 
 function DashboardPage() {
@@ -10,6 +11,10 @@ function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Certificate Modal State
+  const [selectedCertPolicyId, setSelectedCertPolicyId] = useState(null);
+  const [isCertOpen, setIsCertOpen] = useState(false);
 
   useEffect(() => {
     fetchDashboard();
@@ -180,9 +185,21 @@ function DashboardPage() {
                       <td>{formatDate(up.endDate)}</td>
                       <td><span className={`badge ${getStatusBadge(up.status)}`}>{up.status}</span></td>
                       <td>
-                        <Link to={`/catalog/${up.policy.id}`} className="table-link">
-                          <HiExternalLink />
-                        </Link>
+                        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            title="View Official Certificate"
+                            onClick={() => {
+                              setSelectedCertPolicyId(up.id);
+                              setIsCertOpen(true);
+                            }}
+                          >
+                            <HiDocumentText /> Certificate
+                          </button>
+                          <Link to={`/catalog/${up.policy.id}`} className="table-link" title="View Plan Details">
+                            <HiExternalLink />
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -211,6 +228,13 @@ function DashboardPage() {
             <span className="action-arrow"><HiArrowRight /></span>
           </Link>
         </div>
+
+        {/* Policy Certificate Modal */}
+        <PolicyCertificateModal
+          isOpen={isCertOpen}
+          onClose={() => setIsCertOpen(false)}
+          userPolicyId={selectedCertPolicyId}
+        />
       </div>
     </div>
   );
