@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import SphereAIAssistant from '../common/SphereAIAssistant';
 import './AppLayout.css';
 
 function AppLayout() {
@@ -14,6 +15,7 @@ function AppLayout() {
           <p>&copy; {new Date().getFullYear()} PolicySphere. All rights reserved.</p>
         </div>
       </footer>
+      <SphereAIAssistant />
     </div>
   );
 }
