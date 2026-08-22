@@ -31,7 +31,7 @@ function CatalogPage() {
   const [sortBy, setSortBy] = useState('newest');
 
   // Compare & Quote Engine Modals State
-  const [selectedCompareIds, setSelectedCompareIds] = useState([]);
+  const [selectedComparePolicies, setSelectedComparePolicies] = useState([]);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
 
@@ -71,19 +71,18 @@ function CatalogPage() {
     fetchPolicies();
   };
 
-  const toggleCompare = (policyId) => {
-    if (selectedCompareIds.includes(policyId)) {
-      setSelectedCompareIds(selectedCompareIds.filter((id) => id !== policyId));
+  const toggleCompare = (policy) => {
+    const exists = selectedComparePolicies.some((p) => String(p.id) === String(policy.id));
+    if (exists) {
+      setSelectedComparePolicies(selectedComparePolicies.filter((p) => String(p.id) !== String(policy.id)));
     } else {
-      if (selectedCompareIds.length >= 3) {
+      if (selectedComparePolicies.length >= 3) {
         toast.error('You can compare up to 3 policies at a time.');
         return;
       }
-      setSelectedCompareIds([...selectedCompareIds, policyId]);
+      setSelectedComparePolicies([...selectedComparePolicies, policy]);
     }
   };
-
-  const selectedPoliciesForCompare = policies.filter((p) => selectedCompareIds.includes(p.id));
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -186,7 +185,7 @@ function CatalogPage() {
             <p className="catalog-count">{policies.length} plan{policies.length !== 1 ? 's' : ''} available</p>
             <div className="catalog-grid">
               {policies.map((policy, index) => {
-                const isCompared = selectedCompareIds.includes(policy.id);
+                const isCompared = selectedComparePolicies.some((p) => String(p.id) === String(policy.id));
                 return (
                   <div
                     key={policy.id}
@@ -230,7 +229,7 @@ function CatalogPage() {
                         <input
                           type="checkbox"
                           checked={isCompared}
-                          onChange={() => toggleCompare(policy.id)}
+                          onChange={() => toggleCompare(policy)}
                         /> Compare
                       </label>
                       <Link to={`/catalog/${policy.id}`} className="btn btn-primary policy-card-btn">
@@ -246,22 +245,22 @@ function CatalogPage() {
       </div>
 
       {/* Floating Compare Action Bar */}
-      {selectedCompareIds.length > 0 && (
+      {selectedComparePolicies.length > 0 && (
         <div className="compare-floating-bar animate-fade-in-up">
           <div className="compare-bar-content">
             <div>
-              <strong>{selectedCompareIds.length}</strong> {selectedCompareIds.length === 1 ? 'Policy' : 'Policies'} Selected for Comparison
+              <strong>{selectedComparePolicies.length}</strong> {selectedComparePolicies.length === 1 ? 'Policy' : 'Policies'} Selected for Comparison
             </div>
             <div className="compare-bar-actions">
-              <button className="btn btn-secondary btn-sm" onClick={() => setSelectedCompareIds([])}>
+              <button className="btn btn-secondary btn-sm" onClick={() => setSelectedComparePolicies([])}>
                 Clear
               </button>
               <button
                 className="btn btn-primary btn-sm"
                 onClick={() => setIsCompareOpen(true)}
-                disabled={selectedCompareIds.length < 2}
+                disabled={selectedComparePolicies.length < 2}
               >
-                <HiScale /> Compare Side-by-Side ({selectedCompareIds.length})
+                <HiScale /> Compare Side-by-Side ({selectedComparePolicies.length})
               </button>
             </div>
           </div>
@@ -272,7 +271,7 @@ function CatalogPage() {
       <PolicyCompareModal
         isOpen={isCompareOpen}
         onClose={() => setIsCompareOpen(false)}
-        policies={selectedPoliciesForCompare}
+        policies={selectedComparePolicies}
       />
 
       <QuoteEngineModal

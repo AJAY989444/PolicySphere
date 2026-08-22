@@ -402,5 +402,23 @@ input, select, textarea {
   background: var(--color-text-muted);
 }
 
+/* ─── Modal Backdrop System ─────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: var(--space-4);
+  animation: fadeIn 200ms ease-out;
+}
+
 /* ─── Responsive Breakpoints (used in components) ──────── */
 /* sm: 640px, md: 768px, lg: 1024px, xl: 1280px */
