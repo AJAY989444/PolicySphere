@@ -76,6 +76,13 @@ function CatalogPage() {
     if (exists) {
       setSelectedComparePolicies(selectedComparePolicies.filter((p) => String(p.id) !== String(policy.id)));
     } else {
+      if (selectedComparePolicies.length > 0) {
+        const firstCategory = selectedComparePolicies[0].category;
+        if (policy.category !== firstCategory) {
+          toast.error(`You can only compare policies within the same category (${firstCategory}). Clear selection to compare a different category.`);
+          return;
+        }
+      }
       if (selectedComparePolicies.length >= 3) {
         toast.error('You can compare up to 3 policies at a time.');
         return;
