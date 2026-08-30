@@ -1,3 +1,4 @@
+const QuoteService = require('../services/quote.service');
 const prisma = require('../config/db');
 
 /**
@@ -8,69 +9,73 @@ class QuoteController {
   static async calculateQuote(req, res, next) {
     try {
       const {
+        policyId = null,
         category = 'HEALTH',
         age = 30,
-        coverageAmount = 500000,
+        gender = 'MALE',
+        cityTier = 'TIER_1',
+        sumAssured = 500000,
+        ncbPercent = 0,
+        deductible = 0,
+        selectedAddons = [],
         familyMembers = 1,
         smoker = false,
         preExistingConditions = false,
         vehicleAgeYears = 0,
       } = req.body;
 
-      // Base rate calculation multipliers
-      let baseRate = 0.015; // 1.5% base of coverage
-
-      if (category === 'HEALTH') {
-        baseRate = 0.016;
-        if (age > 45) baseRate += 0.008;
-        if (age > 60) baseRate += 0.015;
-        if (smoker) baseRate += 0.005;
-        if (preExistingConditions) baseRate += 0.007;
-        if (familyMembers > 1) baseRate += (familyMembers - 1) * 0.004;
-      } else if (category === 'LIFE') {
-        baseRate = 0.0012; // Life is cheaper ratio relative to sum assured
-        if (age > 40) baseRate += 0.001;
-        if (age > 50) baseRate += 0.0025;
-        if (smoker) baseRate += 0.0015;
-      } else if (category === 'MOTOR') {
-        baseRate = 0.022;
-        if (vehicleAgeYears > 5) baseRate += 0.008;
-      } else if (category === 'TRAVEL') {
-        baseRate = 0.005;
-      } else if (category === 'HOME') {
-        baseRate = 0.002;
-      }
-
-      const calculatedAnnualPremium = Math.round(coverageAmount * baseRate);
-      const calculatedMonthlyPremium = Math.round(calculatedAnnualPremium / 12);
-
-      // Find matching policies from DB within budget range
-      const matchingPolicies = await prisma.insurancePolicy.findMany({
-        where: {
-          category: category,
-          isActive: true,
-        },
-        take: 3,
+      const quoteResult = await QuoteService.calculateQuote({
+        policyId,
+        category,
+        age,
+        gender,
+        cityTier,
+        sumAssured,
+        ncbPercent,
+        deductible,
+        selectedAddons,
+        familyMembers,
+        smoker,
+        preExistingConditions,
+        vehicleAgeYears,
       });
+
+      // Find matching policies from DB if no specific policyId was provided
+      let matchingPolicies = [];
+      if (!policyId) {
+        matchingPolicies = await prisma.insurancePolicy.findMany({
+          where: {
+            category: category,
+            isActive: true,
+          },
+          take: 3,
+        });
+      }
 
       return res.json({
         success: true,
         quote: {
+          ...quoteResult.calculation,
           category,
-          coverageAmount,
-          calculatedAnnualPremium,
-          calculatedMonthlyPremium,
+          coverageAmount: sumAssured,
+          calculatedAnnualPremium: quoteResult.calculation.finalAnnualPremium,
+          calculatedMonthlyPremium: quoteResult.calculation.finalMonthlyPremium,
+          inputs: quoteResult.inputs,
           breakdown: {
-            basePremium: Math.round(calculatedAnnualPremium * 0.82),
-            gstTax: Math.round(calculatedAnnualPremium * 0.18),
+            basePremium: quoteResult.calculation.netBasePremium,
+            gstTax: quoteResult.calculation.gstAmount,
             appliedFactors: {
               ageGroup: age > 45 ? 'Senior Risk Tier' : 'Standard Risk Tier',
               familyMembers,
               smoker,
               preExistingConditions,
+              ageMultiplier: quoteResult.calculation.ageMultiplier,
+              cityRiskFactor: quoteResult.calculation.cityRiskFactor,
             },
           },
+          policyDetails: quoteResult.policyDetails,
           recommendedPolicies: matchingPolicies,
+          availableAddons: quoteResult.availableAddons,
         },
       });
     } catch (error) {

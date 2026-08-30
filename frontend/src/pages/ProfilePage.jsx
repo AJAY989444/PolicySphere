@@ -3,11 +3,14 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../services/api/axios';
 import { useAuth } from '../context/AuthContext';
+import KYCVerificationModal from '../components/profile/KYCVerificationModal';
 import './ProfilePage.css';
 
 function ProfilePage() {
   const { user, setUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [kycStatus, setKycStatus] = useState(null);
+  const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
@@ -19,16 +22,26 @@ function ProfilePage() {
   });
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndKyc = async () => {
       try {
-        const response = await api.get('/users/profile');
-        const profileData = response.data.user;
-        reset({
-          firstName: profileData.firstName || '',
-          lastName: profileData.lastName || '',
-          email: profileData.email || '',
-          phone: profileData.phone || '',
-        });
+        const [profileRes, kycRes] = await Promise.allSettled([
+          api.get('/users/profile'),
+          api.get('/documents/my-kyc')
+        ]);
+        
+        if (profileRes.status === 'fulfilled') {
+          const profileData = profileRes.value.data.user;
+          reset({
+            firstName: profileData.firstName || '',
+            lastName: profileData.lastName || '',
+            email: profileData.email || '',
+            phone: profileData.phone || '',
+          });
+        }
+
+        if (kycRes.status === 'fulfilled' && kycRes.value.data.isSubmitted) {
+          setKycStatus(kycRes.value.data.kyc);
+        }
       } catch (error) {
         toast.error('Failed to load profile data');
       } finally {
@@ -36,18 +49,16 @@ function ProfilePage() {
       }
     };
 
-    fetchProfile();
+    fetchProfileAndKyc();
   }, [reset]);
 
   const onSubmit = async (data) => {
     try {
-      // Don't send email as it's read-only for now
       const { firstName, lastName, phone } = data;
       const response = await api.put('/users/profile', { firstName, lastName, phone });
       
       toast.success('Profile updated successfully');
       
-      // Update global user context with new name
       if (user) {
         setUser({
           ...user,
@@ -58,6 +69,44 @@ function ProfilePage() {
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to update profile');
     }
+  };
+
+  const getKycHeaderBadge = () => {
+    if (!kycStatus || kycStatus.status === 'NOT_SUBMITTED') {
+      return (
+        <button 
+          type="button" 
+          className="btn kyc-btn-warning"
+          onClick={() => setIsKycModalOpen(true)}
+        >
+          ⚠️ Action Required: Submit KYC
+        </button>
+      );
+    }
+    if (kycStatus.status === 'VERIFIED') {
+      return (
+        <span className="badge kyc-badge-verified">
+          KYC Verified ✅ ({kycStatus.documentNumber})
+        </span>
+      );
+    }
+    if (kycStatus.status === 'REJECTED') {
+      return (
+        <button 
+          type="button" 
+          className="btn"
+          style={{ background: 'rgba(239, 68, 68, 0.1)', borderColor: '#ef4444', color: '#ef4444' }}
+          onClick={() => setIsKycModalOpen(true)}
+        >
+          ❌ KYC Rejected - Resubmit
+        </button>
+      );
+    }
+    return (
+      <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: 'bold' }}>
+        ⏳ KYC Pending Advisor Review
+      </span>
+    );
   };
 
   if (isLoading) {
@@ -73,8 +122,13 @@ function ProfilePage() {
     <div className="profile-page">
       <div className="profile-container card">
         <div className="profile-header">
-          <h2>My Profile</h2>
-          <p>Manage your personal information</p>
+          <div className="profile-title-group">
+            <h2>My Profile</h2>
+            <p>Manage your personal information & KYC compliance</p>
+          </div>
+          <div className="kyc-badge-container">
+            {getKycHeaderBadge()}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="profile-form">
@@ -125,13 +179,47 @@ function ProfilePage() {
             />
           </div>
 
+          {kycStatus && (
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--color-border)', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <h4 style={{ margin: 0 }}>KYC Document Submission Status</h4>
+                <span style={{ 
+                  fontWeight: 'bold', 
+                  fontSize: '0.85rem',
+                  color: kycStatus.status === 'VERIFIED' ? '#10b981' : kycStatus.status === 'REJECTED' ? '#ef4444' : '#60a5fa' 
+                }}>
+                  {kycStatus.status === 'VERIFIED' ? '✅ Approved' : kycStatus.status === 'REJECTED' ? '❌ Rejected' : '⏳ Pending Review'}
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                Document: <strong>{kycStatus.documentType}</strong> | Card No: <strong>{kycStatus.documentNumber}</strong><br />
+                Status Note: <em>{kycStatus.notes || 'Awaiting Advisor Review'}</em>
+              </p>
+            </div>
+          )}
+
           <div className="form-actions">
+            {(!kycStatus || kycStatus.status === 'REJECTED') && (
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={() => setIsKycModalOpen(true)}
+              >
+                🪪 Upload ID for Advisor Review
+              </button>
+            )}
             <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
       </div>
+
+      <KYCVerificationModal
+        isOpen={isKycModalOpen}
+        onClose={() => setIsKycModalOpen(false)}
+        onVerificationSuccess={(kycData) => setKycStatus(kycData)}
+      />
     </div>
   );
 }

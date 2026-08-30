@@ -41,52 +41,58 @@ class PaymentService {
     const randomCode = Math.floor(100000 + Math.random() * 900000);
     const transactionRef = `TXN-${randomCode}`;
 
-    // 5. Execute transaction in Prisma
-    return prisma.$transaction(async (tx) => {
-      // Create UserPolicy subscription
-      const userPolicy = await tx.userPolicy.create({
-        data: {
-          userId,
-          policyId,
-          status: 'ACTIVE',
-          startDate,
-          endDate,
-          premiumPaid: policy.premium,
-        },
-        include: {
-          policy: true,
-        },
-      });
+    // 5. Execute transaction in Prisma with extended timeout
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // Create UserPolicy subscription
+        const userPolicy = await tx.userPolicy.create({
+          data: {
+            userId,
+            policyId,
+            status: 'ACTIVE',
+            startDate,
+            endDate,
+            premiumPaid: policy.premium,
+          },
+          include: {
+            policy: true,
+          },
+        });
 
-      // Create PaymentTransaction
-      const transaction = await tx.paymentTransaction.create({
-        data: {
-          userId,
-          userPolicyId: userPolicy.id,
-          amount: policy.premium,
-          currency: 'USD',
-          paymentMethod: paymentMethod || 'CARD',
-          paymentStatus: 'SUCCESS',
-          transactionRef,
-        },
-      });
+        // Create PaymentTransaction
+        const transaction = await tx.paymentTransaction.create({
+          data: {
+            userId,
+            userPolicyId: userPolicy.id,
+            amount: policy.premium,
+            currency: 'INR',
+            paymentMethod: paymentMethod || 'CARD',
+            paymentStatus: 'SUCCESS',
+            transactionRef,
+          },
+        });
 
-      // Trigger In-App Notification (SRS 14)
-      await tx.notification.create({
+        return { userPolicy, transaction };
+      },
+      { timeout: 15000 }
+    );
+
+    // Trigger In-App Notification (SRS 14) outside transaction
+    try {
+      await prisma.notification.create({
         data: {
           userId,
           title: 'Policy Purchased Successfully',
-          message: `Your payment of $${policy.premium.toLocaleString()} for ${policy.name} was successful. Transaction Ref: ${transactionRef}`,
+          message: `Your payment of ₹${policy.premium.toLocaleString()} for ${policy.name} was successful. Transaction Ref: ${transactionRef}`,
           type: 'PAYMENT_SUCCESS',
           linkUrl: '/dashboard',
         },
       });
+    } catch (notifErr) {
+      console.warn('Failed to create purchase notification:', notifErr.message);
+    }
 
-      return {
-        userPolicy,
-        transaction,
-      };
-    });
+    return result;
   }
 
   /**

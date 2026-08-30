@@ -1,14 +1,30 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HiOutlineMenu, HiOutlineX, HiUserCircle } from 'react-icons/hi';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api/axios';
 
 import NotificationCenter from '../common/NotificationCenter';
 
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [kycDue, setKycDue] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      api.get('/documents/my-kyc')
+        .then((res) => {
+          if (!res.data.isSubmitted || res.data.kyc?.status === 'NOT_SUBMITTED' || res.data.kyc?.status === 'REJECTED') {
+            setKycDue(true);
+          } else {
+            setKycDue(false);
+          }
+        })
+        .catch(() => setKycDue(false));
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -115,8 +131,29 @@ function Navbar() {
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
               <NotificationCenter />
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: 'var(--color-text)', textDecoration: 'none' }}>
-                <HiUserCircle size={24} className="text-primary" />
+              <Link 
+                to="/profile" 
+                title={kycDue ? "KYC Verification Due! Click to complete." : "View Profile"}
+                style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: 'var(--color-text)', textDecoration: 'none', position: 'relative' }}
+              >
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <HiUserCircle size={26} className="text-primary" />
+                  {kycDue && (
+                    <span 
+                      style={{
+                        position: 'absolute',
+                        top: '-2px',
+                        right: '-2px',
+                        width: '10px',
+                        height: '10px',
+                        backgroundColor: '#f59e0b',
+                        borderRadius: '50%',
+                        border: '2px solid var(--color-bg)',
+                        boxShadow: '0 0 6px rgba(245, 158, 11, 0.8)'
+                      }}
+                    />
+                  )}
+                </div>
                 <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600, cursor: 'pointer' }}>{user.firstName}</span>
               </Link>
               <button onClick={handleLogout} className="btn btn-ghost btn-sm">Log out</button>

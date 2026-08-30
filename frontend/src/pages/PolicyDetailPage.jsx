@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { HiArrowLeft, HiShieldCheck, HiClock, HiCurrencyRupee, HiCheckCircle, HiBadgeCheck } from 'react-icons/hi';
+import { HiArrowLeft, HiShieldCheck, HiClock, HiCurrencyRupee, HiCheckCircle, HiBadgeCheck, HiCalculator } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 import api from '../services/api/axios';
 import { useAuth } from '../context/AuthContext';
 import PaymentModal from '../components/payment/PaymentModal';
+import QuoteCalculatorModal from '../components/catalog/QuoteCalculatorModal';
 import './PolicyDetailPage.css';
 
 function PolicyDetailPage() {
@@ -14,6 +15,8 @@ function PolicyDetailPage() {
   const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [customQuote, setCustomQuote] = useState(null);
 
   useEffect(() => {
     fetchPolicy();
@@ -35,6 +38,21 @@ function PolicyDetailPage() {
   const handlePurchase = () => {
     if (!user) {
       toast.error('Please sign in to purchase a policy');
+      navigate('/login');
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleProceedFromQuote = ({ customPremium, quoteDetails }) => {
+    setCustomQuote(quoteDetails);
+    setPolicy((prev) => ({
+      ...prev,
+      customPremium,
+    }));
+    setIsQuoteModalOpen(false);
+    if (!user) {
+      toast.error('Please sign in to purchase with your calculated quote');
       navigate('/login');
       return;
     }
@@ -86,6 +104,8 @@ function PolicyDetailPage() {
   const durationLabel = policy.duration >= 12
     ? `${Math.floor(policy.duration / 12)} Year${policy.duration >= 24 ? 's' : ''}`
     : `${policy.duration} Month${policy.duration > 1 ? 's' : ''}`;
+
+  const currentDisplayPremium = policy.customPremium || policy.premium;
 
   return (
     <div className="detail-page animate-fade-in">
@@ -141,7 +161,7 @@ function PolicyDetailPage() {
                   <HiCurrencyRupee size={24} />
                 </div>
                 <div>
-                  <span className="highlight-label">Premium</span>
+                  <span className="highlight-label">Base Premium</span>
                   <span className="highlight-value">{formatCurrency(policy.premium)}</span>
                 </div>
               </div>
@@ -161,11 +181,16 @@ function PolicyDetailPage() {
           <div className="detail-sidebar">
             <div className="purchase-card">
               <div className="purchase-card-header">
-                <span className="purchase-label">Premium</span>
+                <span className="purchase-label">
+                  {policy.customPremium ? 'Custom Calculated Premium' : 'Premium'}
+                </span>
                 <div className="purchase-price">
-                  <span className="purchase-amount">{formatCurrency(policy.premium)}</span>
+                  <span className="purchase-amount">{formatCurrency(currentDisplayPremium)}</span>
                   <span className="purchase-period">/{policy.duration >= 12 ? 'year' : 'month'}</span>
                 </div>
+                {policy.customPremium && (
+                  <span className="badge badge-success mt-1">✓ Custom Quote Applied</span>
+                )}
               </div>
 
               <div className="purchase-details">
@@ -184,6 +209,13 @@ function PolicyDetailPage() {
               </div>
 
               <button
+                className="btn btn-outline btn-full mb-3"
+                onClick={() => setIsQuoteModalOpen(true)}
+              >
+                <HiCalculator /> ⚡ Calculate Custom Quote
+              </button>
+
+              <button
                 className="btn btn-primary btn-lg purchase-btn"
                 onClick={handlePurchase}
               >
@@ -198,6 +230,13 @@ function PolicyDetailPage() {
           </div>
         </div>
       </div>
+
+      <QuoteCalculatorModal
+        policy={policy}
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+        onProceedToCheckout={handleProceedFromQuote}
+      />
 
       <PaymentModal
         policy={policy}

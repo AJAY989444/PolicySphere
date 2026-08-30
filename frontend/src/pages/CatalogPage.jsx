@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { HiSearch, HiFilter, HiArrowRight, HiShieldCheck, HiCalculator, HiScale } from 'react-icons/hi';
 import api from '../services/api/axios';
 import PolicyCompareModal from '../components/catalog/PolicyCompareModal';
-import QuoteEngineModal from '../components/catalog/QuoteEngineModal';
+import QuoteCalculatorModal from '../components/catalog/QuoteCalculatorModal';
+import PaymentModal from '../components/payment/PaymentModal';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './CatalogPage.css';
 
@@ -24,16 +26,40 @@ const SORT_OPTIONS = [
 ];
 
 function CatalogPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  // Compare & Quote Engine Modals State
+  // Compare, Quote Engine & Checkout Modals State
   const [selectedComparePolicies, setSelectedComparePolicies] = useState([]);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
+  const [selectedQuotePolicy, setSelectedQuotePolicy] = useState(null);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [checkoutPolicy, setCheckoutPolicy] = useState(null);
+
+  const handleProceedFromQuote = ({ policy, customPremium }) => {
+    setIsQuoteOpen(false);
+    if (!user) {
+      toast.error('Please sign in to complete purchase with your quote');
+      navigate('/login');
+      return;
+    }
+    const targetPolicy = policy || (policies.length > 0 ? policies[0] : null);
+    if (targetPolicy) {
+      setCheckoutPolicy({
+        ...targetPolicy,
+        customPremium,
+      });
+      setIsPaymentOpen(true);
+    } else {
+      toast.error('No policy selected for checkout.');
+    }
+  };
 
   useEffect(() => {
     fetchPolicies();
@@ -239,6 +265,15 @@ function CatalogPage() {
                           onChange={() => toggleCompare(policy)}
                         /> Compare
                       </label>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => {
+                          setSelectedQuotePolicy(policy);
+                          setIsQuoteOpen(true);
+                        }}
+                      >
+                        ⚡ Custom Quote
+                      </button>
                       <Link to={`/catalog/${policy.id}`} className="btn btn-primary policy-card-btn">
                         View Details <HiArrowRight />
                       </Link>
@@ -281,9 +316,21 @@ function CatalogPage() {
         policies={selectedComparePolicies}
       />
 
-      <QuoteEngineModal
+      <QuoteCalculatorModal
         isOpen={isQuoteOpen}
         onClose={() => setIsQuoteOpen(false)}
+        policy={selectedQuotePolicy}
+        onProceedToCheckout={handleProceedFromQuote}
+      />
+
+      <PaymentModal
+        policy={checkoutPolicy}
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        onSuccess={() => {
+          setIsPaymentOpen(false);
+          navigate('/dashboard');
+        }}
       />
     </div>
   );

@@ -167,8 +167,8 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
           {/* Pricing summary footer */}
           <div className="checkout-summary-box">
             <div className="summary-row">
-              <span>Monthly Premium</span>
-              <span>${policy.premium} / mo</span>
+              <span>Annual / Term Premium</span>
+              <span>₹{(policy.customPremium || policy.premium).toLocaleString()} / yr</span>
             </div>
             <div className="summary-row">
               <span>Coverage Duration</span>
@@ -176,12 +176,12 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
             </div>
             <div className="summary-row total">
               <span>Due Today</span>
-              <span className="total-amount">${policy.premium}</span>
+              <span className="total-amount">₹{(policy.customPremium || policy.premium).toLocaleString()}</span>
             </div>
           </div>
 
           <button type="submit" className="btn btn-primary btn-block pay-btn" disabled={submitting}>
-            {submitting ? 'Processing Payment...' : `Pay $${policy.premium} & Activate Policy`}
+            {submitting ? 'Processing Payment...' : `Pay ₹${(policy.customPremium || policy.premium).toLocaleString()} & Activate Policy`}
           </button>
         </form>
       </div>
