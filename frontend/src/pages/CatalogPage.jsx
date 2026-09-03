@@ -109,8 +109,8 @@ function CatalogPage() {
           return;
         }
       }
-      if (selectedComparePolicies.length >= 3) {
-        toast.error('You can compare up to 3 policies at a time.');
+      if (selectedComparePolicies.length >= 4) {
+        toast.error('You can compare up to 4 policies at a time.');
         return;
       }
       setSelectedComparePolicies([...selectedComparePolicies, policy]);
@@ -298,11 +298,21 @@ function CatalogPage() {
                 Clear
               </button>
               <button
-                className="btn btn-primary btn-sm"
+                className="btn btn-outline btn-sm"
                 onClick={() => setIsCompareOpen(true)}
                 disabled={selectedComparePolicies.length < 2}
               >
-                <HiScale /> Compare Side-by-Side ({selectedComparePolicies.length})
+                <HiScale /> Quick View ({selectedComparePolicies.length})
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  const idsStr = selectedComparePolicies.map((p) => p.id).join(',');
+                  navigate(`/compare?ids=${idsStr}`);
+                }}
+                disabled={selectedComparePolicies.length < 1}
+              >
+                Full Workspace →
               </button>
             </div>
           </div>

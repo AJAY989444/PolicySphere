@@ -8,6 +8,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ProfilePage from './pages/ProfilePage';
 import CatalogPage from './pages/CatalogPage';
 import PolicyDetailPage from './pages/PolicyDetailPage';
+import ComparePage from './pages/ComparePage';
 import DashboardPage from './pages/DashboardPage';
 import ClaimsPage from './pages/ClaimsPage';
 import SubmitClaimPage from './pages/SubmitClaimPage';
@@ -25,9 +26,10 @@ function App() {
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         
-        {/* Public Catalog */}
+        {/* Public Catalog & Comparison Workspace */}
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="catalog/:id" element={<PolicyDetailPage />} />
+        <Route path="compare" element={<ComparePage />} />
         
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>

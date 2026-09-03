@@ -1,5 +1,38 @@
-// Global store for KYC Document Verification requests (in-memory for demo / easily extensible to DB)
+const fs = require('fs');
+const path = require('path');
+
+// File-backed store for KYC Document Verification requests to persist across server restarts
+const STORAGE_FILE = path.join(__dirname, '../../kyc_store.json');
 const kycRequestsStore = new Map();
+
+// Load stored KYC requests from JSON file
+const loadKycStore = () => {
+  try {
+    if (fs.existsSync(STORAGE_FILE)) {
+      const data = JSON.parse(fs.readFileSync(STORAGE_FILE, 'utf8'));
+      Object.entries(data).forEach(([key, val]) => {
+        kycRequestsStore.set(key, val);
+      });
+    }
+  } catch (err) {
+    console.error('Failed to load kyc_store.json:', err.message);
+  }
+};
+
+// Save KYC store to JSON file
+const saveKycStore = () => {
+  try {
+    const obj = {};
+    kycRequestsStore.forEach((value, key) => {
+      obj[key] = value;
+    });
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(obj, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save kyc_store.json:', err.message);
+  }
+};
+
+loadKycStore();
 
 // Helper to seed standard initial pending KYC requests if empty
 const seedInitialKycRequests = () => {
@@ -33,6 +66,7 @@ const seedInitialKycRequests = () => {
       }
     ];
     demoRequests.forEach(req => kycRequestsStore.set(req.id, req));
+    saveKycStore();
   }
 };
 
@@ -42,7 +76,7 @@ const submitKycDocument = async (req, res, next) => {
   try {
     const userId = req.user?.id || 'demo-user';
     const userName = `${req.user?.firstName || 'Customer'} ${req.user?.lastName || ''}`.trim();
-    const userEmail = req.user?.email || 'customer@policysphere.com';
+    const userEmail = (req.user?.email || 'customer@policysphere.com').toLowerCase();
     const { documentType, documentNumber } = req.body;
     const file = req.file;
 
@@ -69,8 +103,11 @@ const submitKycDocument = async (req, res, next) => {
     };
 
     kycRequestsStore.set(docId, newKycRecord);
-    // Also save under user ID lookup
+    // Save lookup by both ID and Email
     kycRequestsStore.set(`user_${userId}`, newKycRecord);
+    kycRequestsStore.set(`email_${userEmail}`, newKycRecord);
+
+    saveKycStore();
 
     return res.json({
       message: 'KYC Document submitted successfully for Advisor verification.',
@@ -84,7 +121,10 @@ const submitKycDocument = async (req, res, next) => {
 const getMyKycStatus = async (req, res, next) => {
   try {
     const userId = req.user?.id || 'demo-user';
-    const kycRecord = kycRequestsStore.get(`user_${userId}`);
+    const userEmail = (req.user?.email || '').toLowerCase();
+    
+    // Lookup by user ID or user Email
+    let kycRecord = kycRequestsStore.get(`user_${userId}`) || (userEmail ? kycRequestsStore.get(`email_${userEmail}`) : null);
 
     if (!kycRecord) {
       return res.json({
@@ -106,8 +146,9 @@ const getMyKycStatus = async (req, res, next) => {
 // Advisor API Endpoints
 const getAllPendingKyc = async (req, res, next) => {
   try {
+    loadKycStore();
     seedInitialKycRequests();
-    // Return unique items filtering out user_ alias keys
+    // Return unique items filtering out user_ and email_ alias keys
     const recordsMap = new Map();
     Array.from(kycRequestsStore.values()).forEach(item => {
       if (item && item.id && item.id.startsWith('kyc-')) {
@@ -140,19 +181,24 @@ const reviewKycDocument = async (req, res, next) => {
     kycRequestsStore.set(id, record);
     if (record.userId) {
       kycRequestsStore.set(`user_${record.userId}`, record);
+    }
+    if (record.userEmail) {
+      kycRequestsStore.set(`email_${record.userEmail.toLowerCase()}`, record);
+    }
 
+    saveKycStore();
+
+    if (record.userId && !record.userId.startsWith('user-')) {
       // Create notification for the user bell icon
-      if (!record.userId.startsWith('user-')) {
-        await NotificationService.createNotification({
-          userId: record.userId,
-          title: status === 'VERIFIED' ? '🎉 KYC Verification Approved!' : '⚠️ KYC Verification Update',
-          message: status === 'VERIFIED'
-            ? `Your ${record.documentType} card verification has been approved by an Advisor.`
-            : `Your ${record.documentType} card verification was rejected. Reason: ${record.notes}`,
-          type: status === 'VERIFIED' ? 'CLAIM_UPDATE' : 'SYSTEM',
-          linkUrl: '/profile'
-        });
-      }
+      await NotificationService.createNotification({
+        userId: record.userId,
+        title: status === 'VERIFIED' ? '🎉 KYC Verification Approved!' : '⚠️ KYC Verification Update',
+        message: status === 'VERIFIED'
+          ? `Your ${record.documentType} card verification has been approved by an Advisor.`
+          : `Your ${record.documentType} card verification was rejected. Reason: ${record.notes}`,
+        type: status === 'VERIFIED' ? 'CLAIM_UPDATE' : 'SYSTEM',
+        linkUrl: '/profile'
+      });
     }
 
     return res.json({

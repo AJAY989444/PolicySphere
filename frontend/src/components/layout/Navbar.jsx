@@ -13,7 +13,7 @@ function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (user && user.role !== 'ADMIN' && user.role !== 'ADVISOR') {
       api.get('/documents/my-kyc')
         .then((res) => {
           if (!res.data.isSubmitted || res.data.kyc?.status === 'NOT_SUBMITTED' || res.data.kyc?.status === 'REJECTED') {
@@ -23,6 +23,8 @@ function Navbar() {
           }
         })
         .catch(() => setKycDue(false));
+    } else {
+      setKycDue(false);
     }
   }, [user]);
 

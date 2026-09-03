@@ -110,7 +110,7 @@ const AdvisorDashboardPage = () => {
           onClick={() => setActiveTab('KYC')}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
         >
-          <HiUserGroup style={{ fontSize: '1.2rem' }} /> Customer KYC Verification ({kycList.length})
+          <HiUserGroup style={{ fontSize: '1.2rem' }} /> Customer KYC Verification ({kycList.filter(k => k.status === 'PENDING_REVIEW').length})
         </button>
       </div>
 

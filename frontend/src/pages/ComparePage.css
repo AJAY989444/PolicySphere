@@ -1,0 +1,138 @@
+.compare-page {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-12);
+  min-height: calc(100vh - 80px);
+  background: var(--color-bg);
+}
+
+.compare-workspace-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--color-primary);
+}
+
+.workspace-title-group h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-top: 4px;
+}
+
+.workspace-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.workspace-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.compare-workspace-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.compare-empty-workspace {
+  text-align: center;
+  padding: 80px 20px;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-2xl);
+  border: 1px dashed var(--color-border);
+}
+
+.compare-empty-workspace .empty-icon {
+  font-size: 3rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.compare-matrix-card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xl);
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .compare-matrix-card,
+  .compare-matrix-card * {
+    visibility: visible !important;
+  }
+
+  .compare-matrix-card {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .compare-table-wrapper {
+    overflow: visible !important;
+  }
+
+  .compare-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .compare-table th,
+  .compare-table td {
+    border: 1px solid #444444 !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    padding: 8px !important;
+  }
+
+  .header-action-group,
+  .best-value-badge {
+    display: none !important;
+  }
+}

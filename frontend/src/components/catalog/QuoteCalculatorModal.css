@@ -109,10 +109,10 @@
   gap: 0.35rem;
 }
 
-.form-label {
-  font-size: 0.8rem;
+.quote-calculator-modal .form-label {
+  font-size: 0.825rem;
   font-weight: 600;
-  color: var(--text-muted, #94a3b8);
+  color: #67e8f9;
 }
 
 .form-input {

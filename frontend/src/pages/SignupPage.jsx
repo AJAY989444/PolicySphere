@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { useAuth } from '../context/AuthContext';
 import './AuthPages.css';
 
@@ -8,6 +9,8 @@ function SignupPage() {
   const { register: formRegister, handleSubmit, formState: { errors }, watch } = useForm();
   const { user, register: registerUser, loading } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -75,31 +78,51 @@ function SignupPage() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className="form-input"
-              placeholder="••••••••"
-              {...formRegister('password', { 
-                required: 'Password is required',
-                minLength: { value: 8, message: 'Must be at least 8 characters' }
-              })}
-            />
+            <div className="password-input-wrapper">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                className="form-input"
+                placeholder="••••••••"
+                {...formRegister('password', { 
+                  required: 'Password is required',
+                  minLength: { value: 8, message: 'Must be at least 8 characters' }
+                })}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <HiEyeOff /> : <HiEye />}
+              </button>
+            </div>
             {errors.password && <span className="form-error">{errors.password.message}</span>}
           </div>
 
           <div className="form-group">
             <label className="form-label" htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              className="form-input"
-              placeholder="••••••••"
-              {...formRegister('confirmPassword', { 
-                required: 'Please confirm password',
-                validate: value => value === password || 'Passwords do not match'
-              })}
-            />
+            <div className="password-input-wrapper">
+              <input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                className="form-input"
+                placeholder="••••••••"
+                {...formRegister('confirmPassword', { 
+                  required: 'Please confirm password',
+                  validate: value => value === password || 'Passwords do not match'
+                })}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                {showConfirmPassword ? <HiEyeOff /> : <HiEye />}
+              </button>
+            </div>
             {errors.confirmPassword && <span className="form-error">{errors.confirmPassword.message}</span>}
           </div>
 

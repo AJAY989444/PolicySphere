@@ -97,6 +97,56 @@ class AuthController {
       next(error);
     }
   }
+
+  static async requestPasswordResetOtp(req, res, next) {
+    try {
+      const schema = z.object({
+        email: z.string().email('Invalid email address'),
+      });
+      const { email } = schema.parse(req.body);
+      const result = await AuthService.sendPasswordResetOtp(email);
+      res.json(result);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return res.status(404).json({ success: false, message: error.message });
+      }
+      next(error);
+    }
+  }
+
+  static async verifyOtp(req, res, next) {
+    try {
+      const schema = z.object({
+        email: z.string().email('Invalid email address'),
+        otp: z.string().length(6, 'OTP must be exactly 6 digits'),
+      });
+      const { email, otp } = schema.parse(req.body);
+      const result = await AuthService.verifyOnlyOtp(email, otp);
+      res.json(result);
+    } catch (error) {
+      if (error.statusCode === 400) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      next(error);
+    }
+  }
+
+  static async setNewPassword(req, res, next) {
+    try {
+      const schema = z.object({
+        email: z.string().email('Invalid email address'),
+        newPassword: z.string().min(8, 'New password must be at least 8 characters'),
+      });
+      const { email, newPassword } = schema.parse(req.body);
+      const result = await AuthService.resetPasswordAfterVerification(email, newPassword);
+      res.json(result);
+    } catch (error) {
+      if (error.statusCode === 400) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      next(error);
+    }
+  }
 }
 
 module.exports = AuthController;

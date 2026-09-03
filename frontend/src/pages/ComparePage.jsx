@@ -1,55 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { HiX, HiCheck, HiOutlineCheckCircle, HiShoppingCart, HiSparkles, HiSwitchHorizontal, HiDocumentText, HiLightningBolt } from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
-import api from '../../services/api/axios';
-import QuoteCalculatorModal from './QuoteCalculatorModal';
-import PaymentModal from '../payment/PaymentModal';
-import { useAuth } from '../../context/AuthContext';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { 
+  HiScale, HiPrinter, HiShare, HiArrowLeft, HiSparkles, 
+  HiCheck, HiOutlineCheckCircle, HiShoppingCart, HiLightningBolt, HiSwitchHorizontal 
+} from 'react-icons/hi';
+import api from '../services/api/axios';
+import QuoteCalculatorModal from '../components/catalog/QuoteCalculatorModal';
+import PaymentModal from '../components/payment/PaymentModal';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import './PolicyCompareModal.css';
+import './ComparePage.css';
 
-function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
+function ComparePage() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [enrichedData, setEnrichedData] = useState(null);
-  const [loading, setLoading] = useState(false);
+
+  const [policies, setPolicies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [diffOnly, setDiffOnly] = useState(false);
 
-  // Quote & Payment modal integration inside comparison view
+  // Quote & Payment modal states
   const [quotePolicy, setQuotePolicy] = useState(null);
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
   const [checkoutPolicy, setCheckoutPolicy] = useState(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && policies.length > 0) {
-      fetchComparisonMetrics();
-    }
-  }, [isOpen, policies]);
+  const policyIdsParam = searchParams.get('ids');
 
-  const fetchComparisonMetrics = async () => {
+  useEffect(() => {
+    fetchComparisonData();
+  }, [policyIdsParam]);
+
+  const fetchComparisonData = async () => {
     setLoading(true);
     try {
-      const policyIds = policies.map((p) => p.id);
-      const res = await api.post('/policies/compare', { policyIds });
-      if (res.data.success) {
-        setEnrichedData(res.data.data);
+      let ids = [];
+      if (policyIdsParam) {
+        ids = policyIdsParam.split(',').filter(Boolean);
+      }
+
+      if (ids.length === 0) {
+        // If no IDs given in URL, fetch 3 default policies for preview
+        const catalogRes = await api.get('/policies', { params: { limit: 3 } });
+        ids = catalogRes.data.policies.slice(0, 3).map((p) => p.id);
+      }
+
+      if (ids.length > 0) {
+        const res = await api.post('/policies/compare', { policyIds: ids });
+        if (res.data.success) {
+          setPolicies(res.data.data.policies || []);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch detailed comparison metrics:', err);
-      // Fallback to basic policies if API fails
+      console.error('Failed to load comparison workspace data:', err);
+      toast.error('Failed to load policy comparison data');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen || policies.length === 0) return null;
+  const handlePrint = () => {
+    window.print();
+  };
 
-  const comparedList = enrichedData?.policies || policies;
-
-  const handleSelectPolicy = (policy) => {
-    onClose();
-    navigate(`/catalog/${policy.id}`);
+  const handleShare = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Comparison link copied to clipboard!');
+    }
   };
 
   const handleOpenQuote = (policy) => {
@@ -71,69 +90,87 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
     }
   };
 
-  // Difference detection helper
   const isDifferent = (getter) => {
-    if (comparedList.length <= 1) return false;
-    const firstVal = JSON.stringify(getter(comparedList[0]));
-    return comparedList.some((p) => JSON.stringify(getter(p)) !== firstVal);
+    if (policies.length <= 1) return false;
+    const firstVal = JSON.stringify(getter(policies[0]));
+    return policies.some((p) => JSON.stringify(getter(p)) !== firstVal);
   };
 
   return (
-    <>
-      <div className="modal-backdrop" onClick={onClose}>
-        <div className="compare-modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="compare-modal-header">
-            <div>
-              <div className="compare-header-badge">
-                <HiSparkles /> Module 7: Policy Comparison Engine
-              </div>
-              <h3>Side-by-Side Policy Comparison</h3>
-              <p>Evaluating {comparedList.length} policies across key decision indicators</p>
-            </div>
+    <div className="compare-page">
+      <div className="container">
+        {/* Workspace Top Navigation Bar */}
+        <div className="compare-workspace-nav">
+          <Link to="/catalog" className="back-link">
+            <HiArrowLeft /> Back to Catalog
+          </Link>
 
-            <div className="compare-modal-controls">
-              <label className="toggle-diff-label">
-                <input
-                  type="checkbox"
-                  checked={diffOnly}
-                  onChange={(e) => setDiffOnly(e.target.checked)}
-                />
-                <span className="toggle-custom-box">
-                  <HiSwitchHorizontal /> Highlight Differences Only
-                </span>
-              </label>
-
-              <button className="close-btn" onClick={onClose}><HiX /></button>
+          <div className="workspace-title-group">
+            <div className="workspace-badge">
+              <HiSparkles /> Module 7: Policy Comparison Workspace
             </div>
+            <h1>Side-by-Side Insurance Analysis</h1>
           </div>
 
-          {loading ? (
-            <div className="compare-loading-state">
-              <div className="spinner spinner-lg"></div>
-              <p>Analyzing metrics, solvency ratios, and AI Value Scores...</p>
-            </div>
-          ) : (
+          <div className="workspace-actions">
+            <label className="toggle-diff-label">
+              <input
+                type="checkbox"
+                checked={diffOnly}
+                onChange={(e) => setDiffOnly(e.target.checked)}
+              />
+              <span className="toggle-custom-box">
+                <HiSwitchHorizontal /> Highlight Differences Only
+              </span>
+            </label>
+
+            <button className="btn btn-outline btn-sm" onClick={handleShare}>
+              <HiShare /> Share Analysis
+            </button>
+            <button className="btn btn-outline btn-sm" onClick={handlePrint}>
+              <HiPrinter /> Print Matrix
+            </button>
+          </div>
+        </div>
+
+        {/* Comparison Workspace Matrix */}
+        {loading ? (
+          <div className="compare-workspace-loading">
+            <div className="spinner spinner-lg"></div>
+            <p>Gathering policy metrics, Claim Settlement Ratios & AI scoring...</p>
+          </div>
+        ) : policies.length === 0 ? (
+          <div className="compare-empty-workspace">
+            <HiScale className="empty-icon" />
+            <h3>No policies selected for comparison</h3>
+            <p>Select policies from our catalog to perform side-by-side analysis.</p>
+            <Link to="/catalog" className="btn btn-primary mt-4">
+              Explore Policy Catalog
+            </Link>
+          </div>
+        ) : (
+          <div className="compare-matrix-card animate-fade-in-up">
             <div className="compare-table-wrapper">
               <table className="compare-table">
                 <thead>
                   <tr>
                     <th className="feature-label-col">
                       <div className="col-header-meta">
-                        <span>Decision Matrix</span>
-                        <small>{comparedList.length} Plans Loaded</small>
+                        <span>Comparison Factors</span>
+                        <small>{policies.length} Plans Loaded</small>
                       </div>
                     </th>
-                    {comparedList.map((p) => (
+                    {policies.map((p) => (
                       <th key={p.id} className={`policy-col-header ${p.isBestValue ? 'is-best-value' : ''}`}>
                         {p.isBestValue && (
                           <div className="best-value-badge">
-                            <HiSparkles /> BEST VALUE CHOICE
+                            <HiSparkles /> BEST VALUE RECOMMENDATION
                           </div>
                         )}
                         <span className="badge badge-primary">{p.category}</span>
                         <h4>{p.name}</h4>
                         <p className="provider-name">{p.provider}</p>
-                        
+
                         {p.metrics?.aiValueScore && (
                           <div className="ai-score-pill">
                             <span>AI Value Score</span>
@@ -152,12 +189,12 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                           >
                             <HiLightningBolt /> Custom Quote
                           </button>
-                          <button 
+                          <Link
+                            to={`/catalog/${p.id}`}
                             className="btn btn-primary btn-sm btn-full"
-                            onClick={() => handleSelectPolicy(p)}
                           >
-                            <HiShoppingCart /> Select & Purchase
-                          </button>
+                            <HiShoppingCart /> Select Plan
+                          </Link>
                         </div>
                       </th>
                     ))}
@@ -168,7 +205,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.coverageAmount)) && (
                     <tr>
                       <td className="feature-label">Sum Assured (Coverage)</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val highlight">
                           ${p.coverageAmount.toLocaleString()}
                         </td>
@@ -180,7 +217,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.metrics?.claimSettlementRatio)) && (
                     <tr>
                       <td className="feature-label">Claim Settlement Ratio (CSR)</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val">
                           <span className="metric-badge metric-csr">
                             {p.metrics?.claimSettlementRatio || 98.2}%
@@ -194,7 +231,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.metrics?.solvencyRatio)) && (
                     <tr>
                       <td className="feature-label">Solvency Ratio</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val font-semibold">
                           {p.metrics?.solvencyRatio || 1.85}x
                         </td>
@@ -206,7 +243,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.metrics?.networkDensity?.count)) && (
                     <tr>
                       <td className="feature-label">Network Density</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val">
                           <strong>{(p.metrics?.networkDensity?.count || 10500).toLocaleString()}</strong>
                           <span className="sub-text"> {p.metrics?.networkDensity?.label || 'Cashless Outlets'}</span>
@@ -219,7 +256,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.metrics?.cashlessSpeed)) && (
                     <tr>
                       <td className="feature-label">Avg. Cashless Speed</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val text-success font-medium">
                           ⚡ {p.metrics?.cashlessSpeed || '30 mins'}
                         </td>
@@ -231,7 +268,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.metrics?.waitingPeriods)) && (
                     <tr>
                       <td className="feature-label">Waiting Periods</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val">
                           <div className="waiting-pill">Initial: {p.metrics?.waitingPeriods?.initial || '30 Days'}</div>
                           {p.metrics?.waitingPeriods?.preExisting !== 'N/A' && (
@@ -246,7 +283,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.metrics?.taxBenefits)) && (
                     <tr>
                       <td className="feature-label">Tax Benefit</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val">
                           <span className="text-success"><HiCheck /> {p.metrics?.taxBenefits || 'Section 80D / 80C Eligible'}</span>
                         </td>
@@ -254,11 +291,11 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                     </tr>
                   )}
 
-                  {/* Row 8: Key Exclusions */}
+                  {/* Row 8: Major Exclusions */}
                   {(!diffOnly || isDifferent((p) => p.metrics?.exclusions)) && (
                     <tr>
                       <td className="feature-label">Major Exclusions</td>
-                      {comparedList.map((p) => (
+                      {policies.map((p) => (
                         <td key={p.id} className="feature-val exclusion-cell">
                           <ul>
                             {(p.metrics?.exclusions || ['Normal Wear & Tear', 'Gross Negligence']).map((exc, i) => (
@@ -274,7 +311,7 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                   {(!diffOnly || isDifferent((p) => p.features)) && (
                     <tr>
                       <td className="feature-label">Inclusions & Features</td>
-                      {comparedList.map((p) => {
+                      {policies.map((p) => {
                         let featuresList = [];
                         try {
                           featuresList = typeof p.features === 'string' ? JSON.parse(p.features) : (p.features || []);
@@ -296,8 +333,8 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Embedded Quote & Payment Modals */}
@@ -314,12 +351,11 @@ function PolicyCompareModal({ isOpen, onClose, policies = [] }) {
         onClose={() => setIsPaymentOpen(false)}
         onSuccess={() => {
           setIsPaymentOpen(false);
-          onClose();
           navigate('/dashboard');
         }}
       />
-    </>
+    </div>
   );
 }
 
-export default PolicyCompareModal;
+export default ComparePage;

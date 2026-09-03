@@ -72,6 +72,13 @@ function ProfilePage() {
   };
 
   const getKycHeaderBadge = () => {
+    if (user?.role === 'ADMIN' || user?.role === 'ADVISOR') {
+      return (
+        <span className="badge badge-primary" style={{ padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: 'bold' }}>
+          🛡️ Internal Staff Account ({user.role})
+        </span>
+      );
+    }
     if (!kycStatus || kycStatus.status === 'NOT_SUBMITTED') {
       return (
         <button 
@@ -199,7 +206,7 @@ function ProfilePage() {
           )}
 
           <div className="form-actions">
-            {(!kycStatus || kycStatus.status === 'REJECTED') && (
+            {user?.role !== 'ADMIN' && user?.role !== 'ADVISOR' && (!kycStatus || kycStatus.status === 'REJECTED') && (
               <button 
                 type="button" 
                 className="btn btn-secondary" 

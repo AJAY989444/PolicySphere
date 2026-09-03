@@ -8,6 +8,9 @@ router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 router.post('/refresh', AuthController.refresh);
 router.post('/logout', AuthController.logout);
+router.post('/request-otp', AuthController.requestPasswordResetOtp);
+router.post('/verify-otp', AuthController.verifyOtp);
+router.post('/reset-password-final', AuthController.setNewPassword);
 
 // Example protected route for testing
 router.get('/me', requireAuth, (req, res) => {

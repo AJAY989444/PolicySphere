@@ -15,4 +15,8 @@ router.get('/:id', PolicyController.getById);
 router.post('/my-policies/:userPolicyId/renew', requireAuth, PolicyController.renewPolicy);
 router.post('/:id/purchase', requireAuth, PolicyController.purchase);
 
+// Policy comparison endpoint
+const ComparisonController = require('../controllers/comparison.controller');
+router.post('/compare', ComparisonController.compare);
+
 module.exports = router;

@@ -297,15 +297,13 @@
   text-align: center;
 }
 
-/* Print Specific Rules */
+/* Print Specific Rules (scoped to certificate modal only) */
 @media print {
-  body * {
+  body:has(#policy-certificate-doc) * {
     visibility: hidden;
   }
-  .no-print {
-    display: none !important;
-  }
-  #policy-certificate-doc, #policy-certificate-doc * {
+  body:has(#policy-certificate-doc) #policy-certificate-doc,
+  body:has(#policy-certificate-doc) #policy-certificate-doc * {
     visibility: visible;
   }
   #policy-certificate-doc {
