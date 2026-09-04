@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { HiSparkles, HiX, HiPaperAirplane, HiShieldCheck, HiArrowRight, HiChatAlt2 } from 'react-icons/hi';
-import { Link } from 'react-router-dom';
+import { HiSparkles, HiX, HiPaperAirplane, HiShieldCheck, HiArrowRight, HiChatAlt2, HiAdjustments } from 'react-icons/hi';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api/axios';
 import './SphereAIAssistant.css';
 
 const QUICK_SUGGESTIONS = [
+  '⚡ Run AI Smart Advisor Wizard',
   '🏥 Recommend a Health plan for my family',
-  '🛡️ Cheap Life insurance under 10k',
-  '📄 How do I file an insurance claim?',
-  '💰 What are 80D tax deductions?',
+  '📄 Explain policy fine print & waiting periods',
+  '💰 What are Section 80D tax deductions?',
 ];
 
 function SphereAIAssistant() {
@@ -23,6 +23,7 @@ function SphereAIAssistant() {
   ]);
   const [loading, setLoading] = useState(false);
   const chatBottomRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
@@ -37,6 +38,12 @@ function SphereAIAssistant() {
   const handleSend = async (textToSend) => {
     const message = textToSend || inputMessage.trim();
     if (!message || loading) return;
+
+    if (message.includes('Smart Advisor Wizard') || message.includes('Run AI Smart Advisor')) {
+      setIsOpen(false);
+      navigate('/smart-advisor');
+      return;
+    }
 
     // Add user message
     const userMsgObj = { sender: 'user', text: message };
@@ -68,11 +75,24 @@ function SphereAIAssistant() {
   };
 
   const formatCurrency = (amount) => {
+    if (amount === undefined || amount === null || isNaN(Number(amount))) return 'N/A';
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(Number(amount));
+  };
+
+  const renderFormattedText = (text) => {
+    if (!text) return '';
+    // Split by markdown bold syntax **text**
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i}>{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
   };
 
   return (
@@ -101,9 +121,22 @@ function SphereAIAssistant() {
                 <span className="online-status">● Live AI Recommendation Engine</span>
               </div>
             </div>
-            <button className="close-btn" onClick={() => setIsOpen(false)}>
-              <HiX />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <button
+                className="btn btn-xs btn-ghost text-white"
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate('/smart-advisor');
+                }}
+                title="Launch AI Advisor Hub"
+                style={{ fontSize: '0.75rem', background: 'rgba(255, 255, 255, 0.15)', color: 'white' }}
+              >
+                <HiAdjustments /> Advisor Hub
+              </button>
+              <button className="close-btn" onClick={() => setIsOpen(false)}>
+                <HiX />
+              </button>
+            </div>
           </div>
 
           {/* Messages Body */}
@@ -116,7 +149,7 @@ function SphereAIAssistant() {
                   </div>
                 )}
                 <div className="message-bubble">
-                  <div className="msg-text">{msg.text}</div>
+                  <div className="msg-text">{renderFormattedText(msg.text)}</div>
 
                   {/* Render Recommended Policy Cards */}
                   {msg.recommendedPolicies && msg.recommendedPolicies.length > 0 && (
@@ -125,17 +158,21 @@ function SphereAIAssistant() {
                         <div key={policy.id} className="ai-policy-card">
                           <div className="ai-card-top">
                             <span className="ai-card-cat">{policy.category}</span>
-                            <span className="ai-card-provider">{policy.provider}</span>
+                            {policy.matchScore && (
+                              <span className="ai-match-badge">
+                                <HiSparkles size={12} /> {policy.matchScore}% Match
+                              </span>
+                            )}
                           </div>
                           <h5>{policy.name}</h5>
                           <div className="ai-card-stats">
                             <div>
-                              <span className="lbl">Coverage:</span>
-                              <strong>{formatCurrency(policy.coverageAmount)}</strong>
+                              <span className="lbl">Coverage: </span>
+                              <strong className="stat-val-cov">{formatCurrency(policy.coverageAmount)}</strong>
                             </div>
                             <div>
-                              <span className="lbl">Premium:</span>
-                              <strong className="text-primary">{formatCurrency(policy.premium)}/yr</strong>
+                              <span className="lbl">Premium: </span>
+                              <strong className="stat-val-prem">{formatCurrency(policy.premium)}/yr</strong>
                             </div>
                           </div>
                           <Link
@@ -152,6 +189,7 @@ function SphereAIAssistant() {
                 </div>
               </div>
             ))}
+
 
             {loading && (
               <div className="message-row ai">
@@ -174,7 +212,7 @@ function SphereAIAssistant() {
               <button
                 key={idx}
                 className="chip-btn"
-                onClick={() => handleSend(chip.replace(/^[^\s]+\s/, ''))}
+                onClick={() => handleSend(chip)}
               >
                 {chip}
               </button>
@@ -206,3 +244,4 @@ function SphereAIAssistant() {
 }
 
 export default SphereAIAssistant;
+

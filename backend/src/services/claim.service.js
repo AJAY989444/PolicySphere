@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const NotificationService = require('./notification.service');
 
 const prisma = new PrismaClient();
 
@@ -117,16 +118,14 @@ const updateClaimStatus = async (claimId, status) => {
     }
   });
 
-  // Trigger Notification for User (SRS 14)
+  // Trigger Notification for User using NotificationService (respects user preferences)
   if (claim.userPolicy?.userId) {
-    await prisma.notification.create({
-      data: {
-        userId: claim.userPolicy.userId,
-        title: `Claim ${status}`,
-        message: `Your insurance claim for ${claim.userPolicy.policy?.name || 'policy'} of $${claim.amount.toLocaleString()} has been ${status.toLowerCase()}.`,
-        type: 'CLAIM_UPDATE',
-        linkUrl: '/claims',
-      }
+    await NotificationService.createNotification({
+      userId: claim.userPolicy.userId,
+      title: `Claim ${status}`,
+      message: `Your insurance claim for ${claim.userPolicy.policy?.name || 'policy'} of $${claim.amount.toLocaleString()} has been ${status.toLowerCase()}.`,
+      type: 'CLAIM_UPDATE',
+      linkUrl: '/claims',
     }).catch(err => console.error('Notification error:', err));
   }
 

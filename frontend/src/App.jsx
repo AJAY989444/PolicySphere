@@ -17,6 +17,9 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import ManagePolicyPage from './pages/ManagePolicyPage';
 import BillingHistoryPage from './pages/BillingHistoryPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import MyProposalsPage from './pages/MyProposalsPage';
+import ProposalWizardPage from './pages/ProposalWizardPage';
+import SmartAdvisorPage from './pages/SmartAdvisorPage';
 
 function App() {
   return (
@@ -30,6 +33,8 @@ function App() {
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="catalog/:id" element={<PolicyDetailPage />} />
         <Route path="compare" element={<ComparePage />} />
+        <Route path="smart-advisor" element={<SmartAdvisorPage />} />
+
         
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
@@ -38,6 +43,9 @@ function App() {
           <Route path="claims" element={<ClaimsPage />} />
           <Route path="claims/new" element={<SubmitClaimPage />} />
           <Route path="billing" element={<BillingHistoryPage />} />
+          <Route path="proposals" element={<MyProposalsPage />} />
+          <Route path="proposals/wizard" element={<ProposalWizardPage />} />
+          <Route path="proposals/wizard/:proposalId" element={<ProposalWizardPage />} />
           <Route path="advisor" element={<AdvisorDashboardPage />} />
         </Route>
 

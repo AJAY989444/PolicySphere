@@ -1,4 +1,5 @@
 const prisma = require('../config/db');
+const NotificationService = require('./notification.service');
 
 class PaymentService {
   /**
@@ -77,16 +78,14 @@ class PaymentService {
       { timeout: 15000 }
     );
 
-    // Trigger In-App Notification (SRS 14) outside transaction
+    // Trigger In-App Notification using NotificationService (respects user preferences)
     try {
-      await prisma.notification.create({
-        data: {
-          userId,
-          title: 'Policy Purchased Successfully',
-          message: `Your payment of ₹${policy.premium.toLocaleString()} for ${policy.name} was successful. Transaction Ref: ${transactionRef}`,
-          type: 'PAYMENT_SUCCESS',
-          linkUrl: '/dashboard',
-        },
+      await NotificationService.createNotification({
+        userId,
+        title: 'Policy Purchased Successfully',
+        message: `Your payment of ₹${policy.premium.toLocaleString()} for ${policy.name} was successful. Transaction Ref: ${transactionRef}`,
+        type: 'POLICY_ISSUED',
+        linkUrl: '/dashboard',
       });
     } catch (notifErr) {
       console.warn('Failed to create purchase notification:', notifErr.message);

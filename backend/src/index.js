@@ -46,6 +46,7 @@ const quoteRoutes = require('./routes/quote.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const aiRoutes = require('./routes/ai.routes');
 const documentRoutes = require('./routes/document.routes');
+const proposalRoutes = require('./routes/proposal.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -58,6 +59,7 @@ app.use('/api/quotes', quoteRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/proposals', proposalRoutes);
 
 // ─── Error Handler (must be last) ─────────────────────────
 app.use(errorHandler);

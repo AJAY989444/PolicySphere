@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { HiArrowLeft, HiShieldCheck, HiClock, HiCurrencyRupee, HiCheckCircle, HiBadgeCheck, HiCalculator } from 'react-icons/hi';
+import { HiArrowLeft, HiShieldCheck, HiClock, HiCurrencyRupee, HiCheckCircle, HiBadgeCheck, HiCalculator, HiSparkles } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 import api from '../services/api/axios';
 import { useAuth } from '../context/AuthContext';
 import PaymentModal from '../components/payment/PaymentModal';
 import QuoteCalculatorModal from '../components/catalog/QuoteCalculatorModal';
+import PolicyAIExplainerModal from '../components/catalog/PolicyAIExplainerModal';
 import './PolicyDetailPage.css';
 
 function PolicyDetailPage() {
@@ -16,6 +17,7 @@ function PolicyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [isExplainerOpen, setIsExplainerOpen] = useState(false);
   const [customQuote, setCustomQuote] = useState(null);
 
   useEffect(() => {
@@ -129,6 +131,55 @@ function PolicyDetailPage() {
               <p className="detail-provider">by <strong>{policy.provider}</strong></p>
             </div>
 
+            {/* AI Fine Print Simplifier Callout Banner */}
+            <div className="ai-explainer-callout-card" style={{
+              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.08) 100%)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: 'var(--radius-lg, 12px)',
+              padding: '1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1.5rem',
+              gap: '1rem',
+              flexWrap: 'wrap'
+            }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+
+                  <HiSparkles size={24} />
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Confused by fine print & waiting periods?</h4>
+                  <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--color-text-muted, #6b7280)' }}>
+                    Get an instant AI Plain English breakdown of exclusions, co-pays, and hidden benefits.
+                  </p>
+                </div>
+              </div>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setIsExplainerOpen(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                  border: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <HiSparkles /> Ask AI to Explain Fine Print
+              </button>
+            </div>
+
             <div className="detail-description card">
               <h3>About this Plan</h3>
               <p>{policy.description}</p>
@@ -209,6 +260,14 @@ function PolicyDetailPage() {
               </div>
 
               <button
+                className="btn btn-outline btn-full mb-2"
+                onClick={() => setIsExplainerOpen(true)}
+                style={{ borderColor: '#6366f1', color: '#6366f1' }}
+              >
+                <HiSparkles /> AI Fine-Print Breakdown
+              </button>
+
+              <button
                 className="btn btn-outline btn-full mb-3"
                 onClick={() => setIsQuoteModalOpen(true)}
               >
@@ -216,10 +275,24 @@ function PolicyDetailPage() {
               </button>
 
               <button
-                className="btn btn-primary btn-lg purchase-btn"
+                className="btn btn-primary btn-lg purchase-btn mb-2"
+                onClick={() => {
+                  if (!user) {
+                    toast.error('Please sign in to start your application');
+                    navigate('/login');
+                    return;
+                  }
+                  navigate(`/proposals/wizard?policyId=${policy.id}`);
+                }}
+              >
+                📝 Apply Now (Digital Application)
+              </button>
+
+              <button
+                className="btn btn-secondary btn-full purchase-btn"
                 onClick={handlePurchase}
               >
-                <HiBadgeCheck /> Buy This Plan
+                <HiBadgeCheck /> Instant 1-Click Buy
               </button>
 
               <div className="purchase-trust">
@@ -230,6 +303,14 @@ function PolicyDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Explainer Modal */}
+      {isExplainerOpen && (
+        <PolicyAIExplainerModal
+          policyId={policy.id}
+          onClose={() => setIsExplainerOpen(false)}
+        />
+      )}
 
       <QuoteCalculatorModal
         policy={policy}
@@ -252,3 +333,4 @@ function PolicyDetailPage() {
 }
 
 export default PolicyDetailPage;
+

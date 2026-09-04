@@ -1,0 +1,542 @@
+/* Smart Advisor Page CSS Styling */
+.smart-advisor-page {
+  padding-top: var(--space-6, 1.5rem);
+  padding-bottom: var(--space-12, 3rem);
+}
+
+.advisor-hero-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 2.5rem auto;
+}
+
+.advisor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.12));
+  color: var(--color-primary, #4f46e5);
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.advisor-hero-header h1 {
+  font-size: var(--font-size-3xl, 2.25rem);
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  color: var(--color-text, #111827);
+  letter-spacing: -0.02em;
+}
+
+.advisor-hero-header p {
+  font-size: var(--font-size-md, 1rem);
+  color: var(--color-text-muted, #6b7280);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Wizard Card */
+.advisor-wizard-card {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: var(--radius-xl, 16px);
+  border: 1px solid var(--color-border, #e5e7eb);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.wizard-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.wizard-card-header h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.wizard-card-header p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text, #1f2937);
+  margin-bottom: 1rem;
+}
+
+.form-section-title span {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-primary, #4f46e5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.advisor-form .form-group label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a !important;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.advisor-form input[type="number"],
+.advisor-form input[type="text"],
+.advisor-form select {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radius-md, 8px);
+  padding: 0.65rem 0.85rem;
+  outline: none;
+}
+
+.advisor-form select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.advisor-form input:focus,
+.advisor-form select:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+
+@media (max-width: 640px) {
+  .span-2 {
+    grid-column: span 1;
+  }
+}
+
+.checkbox-card {
+  background: var(--color-bg-secondary, #f9fafb);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.custom-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.custom-checkbox input {
+  margin-top: 0.25rem;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary, #4f46e5);
+  cursor: pointer;
+}
+
+.custom-checkbox strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text, #111827);
+}
+
+.custom-checkbox .sub-text {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.wizard-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.wizard-submit-btn {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wizard-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+/* STEP 2: Processing Card */
+.advisor-processing-card {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ai-processing-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar-container {
+  width: 80%;
+  height: 8px;
+  background-color: var(--color-border, #e5e7eb);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 1.5rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  width: 100%;
+  animation: loadingBar 1.2s ease-in-out infinite;
+}
+
+@keyframes loadingBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* STEP 3: Results Dashboard */
+.results-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.results-top-bar h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-text, #111827);
+}
+
+.results-top-bar p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Risk Profile Card */
+.risk-profile-card {
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+  border-radius: var(--radius-xl, 16px);
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.risk-header-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+@media (max-width: 768px) {
+  .risk-header-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.risk-gauge-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.risk-score-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 6px solid #10b981;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-secondary, #f9fafb);
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.risk-number {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text, #111827);
+}
+
+.risk-max {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 600;
+}
+
+.risk-tier-badge {
+  display: inline-block;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.risk-adjustment-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text, #1f2937);
+}
+
+/* Risk Mitigation Tips Box */
+.risk-tips-box {
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1rem 1.25rem;
+}
+
+.tips-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.risk-tips-box ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--color-text, #374151);
+  line-height: 1.5;
+}
+
+/* Breakdown Grid */
+.breakdown-title {
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.85rem;
+}
+
+.breakdown-item {
+  background: var(--color-bg-secondary, #f9fafb);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  padding: 0.75rem 1rem;
+}
+
+.breakdown-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.impact-tag {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--color-primary, #4f46e5);
+}
+
+.breakdown-item p {
+  margin: 0;
+  font-size: 0.775rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Recommendations Section */
+.recs-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recs-title-bar h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-text, #111827);
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.rec-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: var(--radius-xl, 16px);
+  border: 1px solid var(--color-border, #e5e7eb);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rec-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.1);
+}
+
+.rec-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.rec-cat-badge {
+  background-color: var(--color-primary-light, #e0e7ff);
+  color: var(--color-primary, #4f46e5);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  margin-right: 0.4rem;
+}
+
+.rec-provider {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 600;
+}
+
+.match-score-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+
+.rec-policy-title {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.rec-rationale {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(168, 85, 247, 0.05));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-md, 8px);
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.825rem;
+  color: var(--color-text, #374151);
+  margin-bottom: 0.85rem;
+  line-height: 1.45;
+}
+
+.rationale-icon {
+  color: #6366f1;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.rec-description {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #6b7280);
+  line-height: 1.45;
+  margin-bottom: 1rem;
+}
+
+.rec-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  margin-bottom: 1.25rem;
+}
+
+.stat-lbl {
+  display: block;
+  font-size: 0.725rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.stat-val {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.rec-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}

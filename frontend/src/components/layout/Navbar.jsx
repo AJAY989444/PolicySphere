@@ -62,7 +62,17 @@ function Navbar() {
               Catalog
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="/smart-advisor"
+              className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              ⚡ Smart Advisor
+            </NavLink>
+          </li>
           {user && (
+
             <>
               <li>
                 <NavLink
@@ -80,6 +90,15 @@ function Navbar() {
                   onClick={() => setMobileOpen(false)}
                 >
                   Claims
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/proposals"
+                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Proposals
                 </NavLink>
               </li>
               <li>

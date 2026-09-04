@@ -18,13 +18,13 @@
 
 .profile-container {
   width: 100%;
-  max-width: 600px;
+  max-width: 680px;
   padding: var(--space-8);
   margin-top: var(--space-4);
 }
 
 .profile-header {
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -50,6 +50,39 @@
   color: var(--color-text-muted);
   font-size: 0.95rem;
   margin: 0;
+}
+
+.profile-nav-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
+}
+
+.profile-tab-btn {
+  background: none;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+}
+
+.profile-tab-btn:hover {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+
+.profile-tab-btn.active {
+  color: var(--color-primary);
+  background: var(--color-primary-50);
 }
 
 .kyc-badge-container {
@@ -115,8 +148,131 @@
   margin-top: var(--space-4);
   display: flex;
   justify-content: flex-end;
+  gap: 1rem;
 }
 
 .form-actions .btn {
   min-width: 150px;
+}
+
+/* Notification Preferences Panel */
+.notification-preferences-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.pref-section h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: var(--color-text);
+}
+
+.pref-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem 0;
+}
+
+.pref-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pref-toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast);
+}
+
+.pref-toggle-item:hover {
+  border-color: var(--color-primary-light);
+}
+
+.pref-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pref-icon {
+  font-size: 1.4rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.claim-icon {
+  color: var(--color-warning);
+}
+
+.policy-icon {
+  color: var(--color-primary);
+}
+
+.promo-icon {
+  color: #8b5cf6;
+}
+
+.pref-info strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  margin-bottom: 0.15rem;
+}
+
+.pref-info p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+/* Custom Switch Toggle */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--color-border);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--color-primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
 }

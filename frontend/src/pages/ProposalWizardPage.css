@@ -1,0 +1,403 @@
+.proposal-wizard-page {
+  padding: 2.5rem 1.5rem 5rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.wizard-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.wizard-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.wizard-header p {
+  color: #475569;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Stepper Bar */
+.wizard-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin-bottom: 3rem;
+  padding: 0 1rem;
+}
+
+.wizard-stepper::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background: #e2e8f0;
+  z-index: 0;
+}
+
+.stepper-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: #475569;
+  transition: all 0.3s ease;
+}
+
+.step-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #475569;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stepper-step.active .step-circle {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border-color: #6366f1;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.stepper-step.completed .step-circle {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.step-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.stepper-step.active .step-label {
+  color: #4f46e5;
+  font-weight: 800;
+}
+
+.stepper-step.completed .step-label {
+  color: #059669;
+}
+
+/* Card Section */
+.wizard-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  margin-bottom: 2rem;
+}
+
+.wizard-card-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wizard-card-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.policy-badge {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  color: #a5b4fc;
+  padding: 0.4rem 0.9rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Form Controls */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.925rem;
+  font-weight: 700;
+  color: #f1f5f9 !important;
+}
+
+.form-input, .form-select, .form-textarea {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 0.625rem;
+  padding: 0.75rem 1rem;
+  color: #0f172a !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 8px;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+}
+
+.form-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f8fafc !important;
+  user-select: none;
+}
+
+.form-checkbox-label input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #6366f1;
+  cursor: pointer;
+}
+
+/* Member dynamic list */
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.member-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 40px;
+  gap: 1rem;
+  align-items: center;
+  background: rgba(30, 41, 59, 0.8);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #334155;
+}
+
+.btn-remove {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 0.5rem;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.btn-remove:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-add-member {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px dashed #818cf8;
+  color: #a5b4fc;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add-member:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+}
+
+/* Price Lock & Summary Banner */
+.premium-lock-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.25) 100%);
+  border: 1px solid #10b981;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lock-info h3 {
+  color: #34d399;
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lock-info p {
+  color: #a7f3d0;
+  font-size: 0.9rem;
+}
+
+.locked-price-tag {
+  text-align: right;
+}
+
+.price-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.price-term {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.risk-flags-box {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.risk-flags-box h4 {
+  color: #fbbf24;
+  margin-bottom: 0.75rem;
+}
+
+.risk-tag {
+  display: inline-block;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fef08a;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Action Buttons */
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-back {
+  background: #334155;
+  color: #ffffff;
+  border: 1px solid #475569;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background: #475569;
+}
+
+.actions-right {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-save-draft {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #64748b;
+  color: #f8fafc;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-save-draft:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.btn-next, .btn-checkout {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+  transition: all 0.2s;
+}
+
+.btn-next:hover, .btn-checkout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+}
+
+.btn-checkout {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.btn-checkout:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+}
+
+@media (max-width: 768px) {
+  .member-row {
+    grid-template-columns: 1fr;
+  }
+  .premium-lock-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .locked-price-tag {
+    text-align: center;
+  }
+}
+

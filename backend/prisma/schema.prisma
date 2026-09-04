@@ -21,6 +21,7 @@ model User {
   phone         String?
   role          Role     @default(CUSTOMER)
   isActive      Boolean  @default(true) @map("is_active")
+  notificationPreferences Json?   @default("{\"email\": true, \"sms\": false, \"inApp\": true, \"claims\": true, \"renewals\": true, \"marketing\": false}") @map("notification_preferences")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -28,6 +29,7 @@ model User {
   userPolicies  UserPolicy[]
   payments      PaymentTransaction[]
   notifications Notification[]
+  proposals     Proposal[]
 
   @@map("users")
 }
@@ -89,8 +91,42 @@ model InsurancePolicy {
   updatedAt      DateTime          @updatedAt @map("updated_at")
 
   userPolicies UserPolicy[]
+  proposals    Proposal[]
 
   @@map("insurance_policies")
+}
+
+// ─── Proposal Management & Digital Application Workflow ───
+
+enum ProposalStatus {
+  DRAFT
+  PENDING_UNDERWRITING
+  APPROVED
+  REJECTED
+  CONVERTED_TO_POLICY
+}
+
+model Proposal {
+  id                String         @id @default(cuid())
+  proposalRef       String         @unique @map("proposal_ref")
+  userId            String         @map("user_id")
+  policyId          String         @map("policy_id")
+  status            ProposalStatus @default(DRAFT)
+  step              Int            @default(1)
+  proposerInfo      Json           @default("{}") @map("proposer_info")
+  membersInfo       Json           @default("[]") @map("members_info")
+  medicalHistory    Json           @default("{}") @map("medical_history")
+  nomineeInfo       Json           @default("{}") @map("nominee_info")
+  lockedPremium     Float?         @map("locked_premium")
+  premiumExpiresAt  DateTime?      @map("premium_expires_at")
+  underwritingFlags Json           @default("{}") @map("underwriting_flags")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  policy InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@map("proposals")
 }
 
 model UserPolicy {
@@ -163,6 +199,8 @@ enum NotificationType {
   PAYMENT_SUCCESS
   POLICY_ISSUED
   RENEWAL_REMINDER
+  KYC_UPDATE
+  PROPOSAL_LOCK_EXPIRING
   SYSTEM
 }
 

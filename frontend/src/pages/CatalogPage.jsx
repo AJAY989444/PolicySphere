@@ -63,7 +63,37 @@ function CatalogPage() {
 
   useEffect(() => {
     fetchPolicies();
+    handleQueryCheckout();
   }, [activeCategory, sortBy]);
+
+  const handleQueryCheckout = async () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const purchasePolicyId = searchParams.get('purchasePolicyId');
+    const proposalId = searchParams.get('proposalId');
+
+    if (purchasePolicyId) {
+      try {
+        let customPremium = null;
+        if (proposalId) {
+          const propRes = await api.get(`/proposals/${proposalId}`);
+          if (propRes.data.success) {
+            customPremium = propRes.data.proposal.lockedPremium;
+          }
+        }
+
+        const res = await api.get(`/policies/${purchasePolicyId}`);
+        if (res.data.policy) {
+          setCheckoutPolicy({
+            ...res.data.policy,
+            customPremium: customPremium || res.data.policy.premium,
+          });
+          setIsPaymentOpen(true);
+        }
+      } catch (err) {
+        console.error('Failed to trigger proposal checkout:', err);
+      }
+    }
+  };
 
   const fetchPolicies = async () => {
     setLoading(true);

@@ -1,0 +1,342 @@
+/* Policy AI Explainer Modal Styling */
+.explainer-modal-container {
+  background-color: var(--color-card-bg, #ffffff);
+  border-radius: var(--radius-xl, 16px);
+  width: 95%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-border, #e5e7eb);
+  overflow: hidden;
+  position: relative;
+}
+
+.explainer-header {
+  padding: var(--space-4, 1rem) var(--space-6, 1.5rem);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.05) 100%);
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+}
+
+.brand-icon-pulse {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.explainer-title {
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text, #1f2937);
+}
+
+.explainer-subtitle {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  margin: 0;
+}
+
+.explainer-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  padding: var(--space-2, 0.5rem);
+  border-radius: var(--radius-full, 9999px);
+  transition: all 0.2s ease;
+}
+
+.explainer-close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--color-text, #1f2937);
+}
+
+.explainer-body {
+  padding: var(--space-6, 1.5rem);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 1.25rem);
+}
+
+.explainer-loading {
+  padding: 3rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ai-spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6366f1;
+}
+
+.spin-icon {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.explainer-error {
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Policy Meta Banner */
+.policy-meta-banner {
+  background: var(--color-bg-secondary, #f9fafb);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--space-4, 1rem) var(--space-5, 1.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.policy-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.cat-badge {
+  background-color: var(--color-primary-light, #e0e7ff);
+  color: var(--color-primary, #4f46e5);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 700;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.provider-name {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 600;
+}
+
+.meta-policy-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.policy-meta-financials {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.policy-meta-financials .lbl {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* AI Verdict Card */
+.ai-verdict-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.verdict-icon {
+  color: #4f46e5;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.verdict-text {
+  font-size: 0.925rem;
+  line-height: 1.5;
+  color: var(--color-text, #1f2937);
+  font-weight: 500;
+}
+
+/* Explainer Grid */
+.explainer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.explainer-card {
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.125rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.pros-card {
+  background-color: rgba(16, 185, 129, 0.04);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.exclusions-card {
+  background-color: rgba(239, 68, 68, 0.04);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-heading h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.explainer-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.explainer-card li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-text, #374151);
+}
+
+.icon-bullet {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+/* Clauses Grid */
+.clauses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.clause-item {
+  background: var(--color-bg-secondary, #f9fafb);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  padding: 1rem;
+}
+
+.clause-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.clause-header h6 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text, #1f2937);
+}
+
+.clause-item p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #4b5563);
+  line-height: 1.4;
+}
+
+/* Hidden Benefits Section */
+.hidden-benefits-section {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(99, 102, 241, 0.05));
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1rem;
+}
+
+.benefits-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.benefits-title h5 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text, #1f2937);
+}
+
+.benefits-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.benefit-pill {
+  background: var(--color-card-bg, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-text, #374151);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.explainer-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-bg-secondary, #f9fafb);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
