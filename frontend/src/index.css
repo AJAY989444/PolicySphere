@@ -259,19 +259,23 @@ input, select, textarea {
 
 .form-label, label {
   font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 700 !important;
+  color: #0f172a !important;
   display: inline-block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  opacity: 1 !important;
 }
 
 .modal-backdrop label,
 .modal-backdrop .form-label,
-.modal-content label {
+.modal-content label,
+.auth-container label,
+.auth-page label {
   color: #0f172a !important;
   font-weight: 700 !important;
   opacity: 1 !important;
 }
+
 
 
 .form-input, input, select, textarea {

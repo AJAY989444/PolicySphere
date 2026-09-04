@@ -57,9 +57,19 @@
   margin-bottom: var(--space-2);
 }
 
+.auth-form label,
+.auth-container label,
+.form-label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  opacity: 1 !important;
+}
+
 .label-with-link .form-label {
   margin-bottom: 0;
 }
+
 
 .forgot-password-link {
   background: none;
