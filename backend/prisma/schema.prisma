@@ -33,6 +33,8 @@ model User {
   assignedLeads  Lead[]               @relation("AdvisorLeads")
   leadActivities LeadActivity[]
   commissions    AdvisorCommission[]
+  underwritingAssessments UnderwritingAssessment[]
+  refunds        RefundTransaction[]
 
   @@map("users")
 }
@@ -95,6 +97,7 @@ model InsurancePolicy {
 
   userPolicies UserPolicy[]
   proposals    Proposal[]
+  underwritingAssessments UnderwritingAssessment[]
 
   @@map("insurance_policies")
 }
@@ -128,6 +131,7 @@ model Proposal {
 
   user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   policy InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  underwritingAssessment UnderwritingAssessment?
 
   @@map("proposals")
 }
@@ -178,21 +182,80 @@ enum PaymentStatus {
   REFUNDED
 }
 
-model PaymentTransaction {
-  id             String        @id @default(cuid())
-  userId         String        @map("user_id")
-  userPolicyId   String?       @map("user_policy_id")
-  amount         Float
-  currency       String        @default("USD")
-  paymentMethod  String        @map("payment_method") // CARD, NET_BANKING, UPI, PAYPAL
-  paymentStatus  PaymentStatus @default(SUCCESS) @map("payment_status")
-  transactionRef String        @unique @map("transaction_ref")
-  createdAt      DateTime      @default(now()) @map("created_at")
+enum PaymentGateway {
+  RAZORPAY
+  STRIPE
+  UPI_AUTOPAY
+  NET_BANKING
+}
 
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userPolicy UserPolicy? @relation(fields: [userPolicyId], references: [id])
+enum RefundStatus {
+  NONE
+  PARTIAL
+  FULL
+}
+
+enum RefundReason {
+  CANCELLED_POLICY
+  DUPLICATE_PAYMENT
+  UNDERWRITING_REJECTED
+  OVERPAYMENT
+  CUSTOMER_REQUEST
+}
+
+model PaymentTransaction {
+  id             String         @id @default(cuid())
+  userId         String         @map("user_id")
+  userPolicyId   String?        @map("user_policy_id")
+  amount         Float
+  currency       String         @default("USD")
+  paymentMethod  String         @map("payment_method") // CARD, NET_BANKING, UPI, EMI
+  paymentGateway PaymentGateway @default(RAZORPAY) @map("payment_gateway")
+  gatewayTxnId   String?        @map("gateway_txn_id")
+  paymentStatus  PaymentStatus  @default(SUCCESS) @map("payment_status")
+  refundStatus   RefundStatus   @default(NONE) @map("refund_status")
+  totalRefunded  Float          @default(0) @map("total_refunded")
+  transactionRef String         @unique @map("transaction_ref")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userPolicy UserPolicy?         @relation(fields: [userPolicyId], references: [id])
+  refunds    RefundTransaction[]
 
   @@map("payment_transactions")
+}
+
+model RefundTransaction {
+  id              String       @id @default(cuid())
+  refundRef       String       @unique @map("refund_ref")
+  transactionId   String       @map("transaction_id")
+  userId          String       @map("user_id")
+  amount          Float
+  reason          RefundReason @default(CUSTOMER_REQUEST)
+  status          String       @default("COMPLETED") // COMPLETED, PENDING, FAILED
+  gatewayRefundId String?      @map("gateway_refund_id")
+  notes           String?
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  transaction PaymentTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refund_transactions")
+}
+
+model PaymentReconciliationLog {
+  id                String   @id @default(cuid())
+  reconciliationRef String   @unique @map("reconciliation_ref")
+  runDate           DateTime @default(now()) @map("run_date")
+  totalTransactions Int      @map("total_transactions")
+  totalAmount       Float    @map("total_amount")
+  matchedCount      Int      @map("matched_count")
+  discrepancyCount  Int      @map("discrepancy_count")
+  status            String   @default("SUCCESS") // SUCCESS, DISCREPANCY_FLAGGED
+  reportSummary     Json     @default("{}") @map("report_summary")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("payment_reconciliation_logs")
 }
 
 // ─── Notifications ─────────────────────────────────────────
@@ -280,5 +343,64 @@ model AdvisorCommission {
 
   @@map("advisor_commissions")
 }
+
+// ─── Automated Underwriting & Compliance Engine ────────────
+
+enum UnderwritingRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  DECLINED
+}
+
+enum UnderwritingAssessmentStatus {
+  AUTO_APPROVED
+  PENDING_REVIEW
+  COUNTER_OFFERED
+  APPROVED_WITH_LOADING
+  REJECTED
+}
+
+model UnderwritingAssessment {
+  id               String                       @id @default(cuid())
+  proposalId       String                       @unique @map("proposal_id")
+  userId           String                       @map("user_id")
+  policyId         String                       @map("policy_id")
+  riskScore        Float                        @map("risk_score")
+  riskLevel        UnderwritingRiskLevel        @map("risk_level")
+  appliedLoading   Float                        @default(0.0) @map("applied_loading")
+  basePremium      Float                        @map("base_premium")
+  finalPremium     Float                        @map("final_premium")
+  riskFactors      Json                         @default("[]") @map("risk_factors")
+  status           UnderwritingAssessmentStatus @default(PENDING_REVIEW)
+  underwriterNotes String?                      @map("underwriter_notes")
+  riderExclusions  Json                         @default("[]") @map("rider_exclusions")
+  createdAt        DateTime                     @default(now()) @map("created_at")
+  updatedAt        DateTime                     @updatedAt @map("updated_at")
+
+  proposal  Proposal            @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  policy    InsurancePolicy     @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  auditLogs ComplianceAuditLog[]
+
+  @@map("underwriting_assessments")
+}
+
+model ComplianceAuditLog {
+  id               String   @id @default(cuid())
+  assessmentId     String?  @map("assessment_id")
+  proposalId       String?  @map("proposal_id")
+  actorId          String?  @map("actor_id")
+  action           String
+  ruleTriggered    String?  @map("rule_triggered")
+  compliancePassed Boolean  @default(true) @map("compliance_passed")
+  metadata         Json     @default("{}")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  assessment UnderwritingAssessment? @relation(fields: [assessmentId], references: [id], onDelete: SetNull)
+
+  @@map("compliance_audit_logs")
+}
+
 
 

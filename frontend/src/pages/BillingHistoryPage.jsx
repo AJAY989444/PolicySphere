@@ -80,9 +80,19 @@ function BillingHistoryPage() {
                       <strong>${tx.amount.toFixed(2)}</strong>
                     </td>
                     <td>
-                      <span className="badge badge-success">
-                        <HiCheckCircle /> Paid
-                      </span>
+                      {tx.paymentStatus === 'REFUNDED' || tx.refundStatus === 'FULL' ? (
+                        <span className="badge badge-danger">
+                          Refunded (₹{tx.totalRefunded || tx.amount})
+                        </span>
+                      ) : tx.refundStatus === 'PARTIAL' ? (
+                        <span className="badge badge-warning">
+                          Partial Refund (₹{tx.totalRefunded})
+                        </span>
+                      ) : (
+                        <span className="badge badge-success">
+                          <HiCheckCircle /> Paid
+                        </span>
+                      )}
                     </td>
                     <td>
                       <button
@@ -132,7 +142,13 @@ function BillingHistoryPage() {
               </div>
               <div>
                 <span className="meta-label">PAYMENT STATUS</span>
-                <span className="meta-val text-success">COMPLETED</span>
+                <span className={`meta-val ${selectedInvoice.refundStatus === 'FULL' || selectedInvoice.paymentStatus === 'REFUNDED' ? 'text-danger' : selectedInvoice.refundStatus === 'PARTIAL' ? 'text-warning' : 'text-success'}`}>
+                  {selectedInvoice.refundStatus === 'FULL' || selectedInvoice.paymentStatus === 'REFUNDED'
+                    ? `REFUNDED (₹${selectedInvoice.totalRefunded || selectedInvoice.amount})`
+                    : selectedInvoice.refundStatus === 'PARTIAL'
+                    ? `PARTIAL REFUND (₹${selectedInvoice.totalRefunded})`
+                    : 'COMPLETED'}
+                </span>
               </div>
             </div>
 

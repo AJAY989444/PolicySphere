@@ -11,11 +11,11 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/analytics', requireRole(['ADMIN', 'ADVISOR']), AnalyticsController.getOverview);
+router.get('/stats', requireRole(['ADMIN', 'ADVISOR']), AdminController.getStats);
+router.get('/policies', requireRole(['ADMIN', 'ADVISOR']), AdminController.getAllPolicies);
 
-router.use(requireRole(['ADMIN']));
+router.use(requireRole(['ADMIN', 'ADVISOR']));
 router.post('/seed-demo', AdminController.seedDemo);
-router.get('/stats', AdminController.getStats);
-router.get('/policies', AdminController.getAllPolicies);
 router.post('/policies', AdminController.createPolicy);
 router.put('/policies/:id', AdminController.updatePolicy);
 router.delete('/policies/:id', AdminController.deactivatePolicy);

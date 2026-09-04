@@ -48,6 +48,8 @@ const aiRoutes = require('./routes/ai.routes');
 const documentRoutes = require('./routes/document.routes');
 const proposalRoutes = require('./routes/proposal.routes');
 const crmRoutes = require('./routes/crm.routes');
+const underwritingRoutes = require('./routes/underwriting.routes');
+const paymentGatewayRoutes = require('./routes/paymentGateway.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -62,6 +64,9 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/proposals', proposalRoutes);
 app.use('/api/crm', crmRoutes);
+app.use('/api/underwriting', underwritingRoutes);
+app.use('/api/payments-engine', paymentGatewayRoutes);
+
 
 
 // ─── Error Handler (must be last) ─────────────────────────

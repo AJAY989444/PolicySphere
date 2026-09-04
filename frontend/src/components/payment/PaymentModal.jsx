@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../services/api/axios';
-import { HiCreditCard, HiX, HiCheckCircle, HiLockClosed, HiShieldCheck } from 'react-icons/hi';
+import { processGatewayCheckout } from '../../services/api/paymentEngineApi';
+import { HiCreditCard, HiX, HiCheckCircle, HiLockClosed, HiShieldCheck, HiQrcode, HiCalculator } from 'react-icons/hi';
 import './PaymentModal.css';
 
 function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
+  const [gateway, setGateway] = useState('RAZORPAY');
   const [method, setMethod] = useState('CARD');
+  const [emiTenure, setEmiTenure] = useState(6);
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -20,6 +23,7 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
       cardHolder: 'John Doe',
       expiryDate: '12/28',
       cvv: '123',
+      upiId: 'john.doe@upi',
     },
   });
 
@@ -29,20 +33,28 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
 
   if (!isOpen || !policy) return null;
 
+  const totalAmount = policy.customPremium || policy.premium;
+  const emiPerMonth = Math.round((totalAmount * 1.08) / emiTenure);
+
   const onSubmit = async (data) => {
     try {
       setSubmitting(true);
       const payload = {
         policyId: policy.id,
         paymentMethod: method,
+        paymentGateway: gateway,
+        amount: totalAmount,
         cardNumber: data.cardNumber,
         cardHolder: data.cardHolder,
         expiryDate: data.expiryDate,
         cvv: data.cvv,
+        upiId: data.upiId,
+        emiTenure: method === 'EMI' ? emiTenure : undefined,
       };
 
+      // Call primary backend payment endpoint (which creates user policy & transaction)
       const res = await api.post('/payments/checkout', payload);
-      toast.success(res.data.message || 'Payment Successful!');
+      toast.success(res.data.message || 'Payment Authorized via Gateway!');
       onSuccess(res.data.data);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Payment failed. Please try again.');
@@ -60,7 +72,7 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
 
         <div className="modal-header">
           <div className="security-tag">
-            <HiLockClosed /> 256-Bit Encrypted Secure Checkout
+            <HiLockClosed /> 256-Bit Encrypted Multi-Gateway Engine
           </div>
           <h2>Complete Your Purchase</h2>
           <p className="policy-summary-title">
@@ -68,11 +80,42 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
           </p>
         </div>
 
+        {/* Gateway Selection */}
+        <div className="gateway-selector-box">
+          <label className="gw-label">SELECT PAYMENT GATEWAY:</label>
+          <div className="gw-options">
+            <button
+              type="button"
+              className={`gw-btn ${gateway === 'RAZORPAY' ? 'active' : ''}`}
+              onClick={() => setGateway('RAZORPAY')}
+            >
+              <span className="gw-dot"></span> Razorpay
+            </button>
+            <button
+              type="button"
+              className={`gw-btn ${gateway === 'STRIPE' ? 'active' : ''}`}
+              onClick={() => setGateway('STRIPE')}
+            >
+              <span className="gw-dot"></span> Stripe
+            </button>
+            <button
+              type="button"
+              className={`gw-btn ${gateway === 'UPI_AUTOPAY' ? 'active' : ''}`}
+              onClick={() => {
+                setGateway('UPI_AUTOPAY');
+                setMethod('UPI');
+              }}
+            >
+              <span className="gw-dot"></span> UPI AutoPay
+            </button>
+          </div>
+        </div>
+
         {/* Live Visual Card */}
         {method === 'CARD' && (
           <div className="credit-card-preview">
             <div className="card-chip"></div>
-            <div className="card-logo">PolicySphere Pay</div>
+            <div className="card-logo">{gateway} Gateway</div>
             <div className="card-number">{cardNumber}</div>
             <div className="card-footer">
               <div>
@@ -94,14 +137,21 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
             className={`tab-btn ${method === 'CARD' ? 'active' : ''}`}
             onClick={() => setMethod('CARD')}
           >
-            <HiCreditCard /> Credit / Debit Card
+            <HiCreditCard /> Card
           </button>
           <button
             type="button"
             className={`tab-btn ${method === 'UPI' ? 'active' : ''}`}
             onClick={() => setMethod('UPI')}
           >
-            Instant UPI
+            <HiQrcode /> UPI / AutoPay
+          </button>
+          <button
+            type="button"
+            className={`tab-btn ${method === 'EMI' ? 'active' : ''}`}
+            onClick={() => setMethod('EMI')}
+          >
+            <HiCalculator /> Easy EMI
           </button>
           <button
             type="button"
@@ -113,7 +163,7 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          {method === 'CARD' ? (
+          {method === 'CARD' && (
             <div className="form-fields">
               <div className="form-group">
                 <label>Card Number</label>
@@ -157,10 +207,54 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
                 </div>
               </div>
             </div>
-          ) : (
+          )}
+
+          {method === 'UPI' && (
+            <div className="upi-qr-box">
+              <div className="qr-preview-wrapper">
+                <div className="qr-code-placeholder">
+                  <HiQrcode className="qr-icon" />
+                  <span>Scan QR via GPay / PhonePe / Paytm</span>
+                </div>
+              </div>
+              <div className="form-group" style={{ width: '100%' }}>
+                <label>Or enter VPA / UPI ID:</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="name@upi"
+                  {...register('upiId')}
+                />
+              </div>
+            </div>
+          )}
+
+          {method === 'EMI' && (
+            <div className="emi-calculator-box">
+              <label>Select EMI Tenure (No Cost / Standard EMI):</label>
+              <div className="tenure-pills">
+                {[3, 6, 12].map((months) => (
+                  <button
+                    key={months}
+                    type="button"
+                    className={`tenure-pill ${emiTenure === months ? 'active' : ''}`}
+                    onClick={() => setEmiTenure(months)}
+                  >
+                    {months} Months
+                    <span>₹{Math.round((totalAmount * 1.08) / months)}/mo</span>
+                  </button>
+                ))}
+              </div>
+              <div className="emi-breakdown-note">
+                Total Payable: ₹{Math.round(totalAmount * 1.08).toLocaleString()} (incl. 8% p.a interest).
+              </div>
+            </div>
+          )}
+
+          {method === 'NET_BANKING' && (
             <div className="alternative-payment-box">
               <HiShieldCheck className="alt-icon" />
-              <p>You will be securely redirected to your provider portal to authorize payment.</p>
+              <p>You will be securely redirected to HDFC / ICICI / SBI portal to authorize payment via {gateway}.</p>
             </div>
           )}
 
@@ -168,20 +262,22 @@ function PaymentModal({ policy, isOpen, onClose, onSuccess }) {
           <div className="checkout-summary-box">
             <div className="summary-row">
               <span>Annual / Term Premium</span>
-              <span>₹{(policy.customPremium || policy.premium).toLocaleString()} / yr</span>
+              <span>₹{totalAmount.toLocaleString()} / yr</span>
             </div>
             <div className="summary-row">
-              <span>Coverage Duration</span>
-              <span>{policy.duration} Months</span>
+              <span>Selected Gateway</span>
+              <span className="gw-badge-summary">{gateway}</span>
             </div>
             <div className="summary-row total">
               <span>Due Today</span>
-              <span className="total-amount">₹{(policy.customPremium || policy.premium).toLocaleString()}</span>
+              <span className="total-amount">
+                {method === 'EMI' ? `₹${emiPerMonth.toLocaleString()} / mo` : `₹${totalAmount.toLocaleString()}`}
+              </span>
             </div>
           </div>
 
           <button type="submit" className="btn btn-primary btn-block pay-btn" disabled={submitting}>
-            {submitting ? 'Processing Payment...' : `Pay ₹${(policy.customPremium || policy.premium).toLocaleString()} & Activate Policy`}
+            {submitting ? 'Authorizing via Gateway...' : `Pay & Activate Policy (${gateway})`}
           </button>
         </form>
       </div>

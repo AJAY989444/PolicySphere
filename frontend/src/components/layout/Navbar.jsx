@@ -114,6 +114,24 @@ function Navbar() {
                 <>
                   <li>
                     <NavLink
+                      to="/admin/reconciliation"
+                      className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <span>💳</span> Payments & Refunds
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/underwriting"
+                      className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <span>⚖️</span> Underwriting
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
                       to="/advisor/crm"
                       className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
                       onClick={() => setMobileOpen(false)}
@@ -132,6 +150,15 @@ function Navbar() {
                   </li>
                   <li>
                     <NavLink
+                      to="/admin"
+                      className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <span>🛡️</span> Admin Panel
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
                       to="/admin/analytics"
                       className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
                       onClick={() => setMobileOpen(false)}
@@ -140,19 +167,6 @@ function Navbar() {
                     </NavLink>
                   </li>
                 </>
-              )}
-
-
-              {user.role === 'ADMIN' && (
-                <li>
-                  <NavLink
-                    to="/admin"
-                    className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Admin Panel
-                  </NavLink>
-                </li>
               )}
             </>
           )}

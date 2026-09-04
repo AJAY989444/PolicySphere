@@ -21,6 +21,8 @@ import MyProposalsPage from './pages/MyProposalsPage';
 import ProposalWizardPage from './pages/ProposalWizardPage';
 import SmartAdvisorPage from './pages/SmartAdvisorPage';
 import AdvisorCrmPage from './pages/AdvisorCrmPage';
+import UnderwritingPage from './pages/UnderwritingPage';
+import PaymentReconciliationPage from './pages/PaymentReconciliationPage';
 
 function App() {
   return (
@@ -52,13 +54,10 @@ function App() {
 
         {/* Staff & Admin Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'ADVISOR']} />}>
+          <Route path="underwriting" element={<UnderwritingPage />} />
           <Route path="advisor/crm" element={<AdvisorCrmPage />} />
           <Route path="admin/analytics" element={<AnalyticsPage />} />
-        </Route>
-
-
-        {/* Admin Protected Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+          <Route path="admin/reconciliation" element={<PaymentReconciliationPage />} />
           <Route path="admin" element={<AdminDashboardPage />} />
           <Route path="admin/policies/new" element={<ManagePolicyPage />} />
           <Route path="admin/policies/edit/:id" element={<ManagePolicyPage />} />

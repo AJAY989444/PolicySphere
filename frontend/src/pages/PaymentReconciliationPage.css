@@ -1,0 +1,562 @@
+/* PaymentReconciliationPage.css - High Contrast & Premium Financial Styling */
+
+.reconciliation-page {
+  padding: 2rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  color: #0f172a;
+}
+
+.reconciliation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #e0e7ff;
+  border: 1px solid #c7d2fe;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  color: #3730a3;
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+
+.reconciliation-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.025em;
+}
+
+.reconciliation-header p {
+  color: #475569;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-refresh {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 0.65rem 1.15rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.btn-trigger-rec {
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  color: #ffffff !important;
+  border: none;
+  padding: 0.65rem 1.35rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.btn-trigger-rec:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+/* Metrics Grid */
+.payment-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.pay-metric-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.35rem;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.pay-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.icon-indigo { background: #eef2ff; color: #4338ca; }
+.icon-rose { background: #fff1f2; color: #be123c; }
+.icon-emerald { background: #ecfdf5; color: #047857; }
+.icon-amber { background: #fffbeb; color: #b45309; }
+
+.pay-metric-info label {
+  display: block;
+  font-size: 0.75rem;
+  color: #475569;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pay-metric-info h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.pay-metric-info span {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Tabs */
+.reconciliation-tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+.rec-tab-btn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  padding: 0.85rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rec-tab-btn.active {
+  color: #4f46e5;
+  border-bottom-color: #4f46e5;
+  background: #eef2ff;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+/* Controls Bar */
+.pay-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  width: 380px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.95rem;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.filter-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.filter-group select {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+}
+
+.btn-filter-apply {
+  background: #4f46e5;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Table */
+.table-wrapper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+.rec-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.rec-table th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.825rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.rec-table td {
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.txn-ref-cell strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.txn-ref-cell span {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.gw-txn-code {
+  display: inline-block;
+  background: #f1f5f9;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #475569;
+  margin-top: 0.2rem;
+}
+
+.user-policy-cell strong {
+  display: block;
+  color: #0f172a;
+}
+
+.user-policy-cell span {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.policy-name-tag {
+  color: #4338ca !important;
+  font-weight: 700;
+}
+
+.gw-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.gw-razorpay { background: #e0e7ff; color: #3730a3; }
+.gw-stripe { background: #ede9fe; color: #5b21b6; }
+.gw-upi_autopay { background: #dcfce7; color: #166534; }
+.gw-net_banking { background: #fef3c7; color: #92400e; }
+
+.status-pill {
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-success { background: #d1fae5; color: #065f46; }
+.status-failed { background: #fee2e2; color: #991b1b; }
+.status-refunded { background: #fef3c7; color: #92400e; }
+
+.refund-pill {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.refund-full { color: #dc2626; }
+.refund-partial { color: #d97706; }
+.refund-none { color: #94a3b8; }
+
+.btn-refund-action {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.825rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-refund-action:hover {
+  background: #ffe4e6;
+  border-color: #fda4af;
+}
+
+/* Reconciliation Audit Feed */
+.reconciliation-history-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.rec-log-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.rec-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.rec-ref-badge {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+.rec-log-header h4 {
+  margin: 0.35rem 0 0 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.rec-log-body {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 1.1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.rec-stat-box label {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.rec-stat-box strong {
+  font-size: 1.25rem;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.rec-log-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Webhook Feed */
+.webhook-feed-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.webhook-log-item {
+  background: #0f172a;
+  border-radius: 14px;
+  padding: 1.25rem;
+  color: #f8fafc;
+}
+
+.wh-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.wh-event {
+  color: #818cf8;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.wh-time {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.wh-code {
+  margin: 0;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #34d399;
+}
+
+/* Refund Modal Card */
+.refund-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.3);
+  overflow: hidden;
+}
+
+.txn-refund-summary {
+  display: flex;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1.25rem;
+}
+
+.txn-refund-summary label {
+  display: block;
+  font-size: 0.75rem;
+  color: #475569 !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+  text-transform: uppercase;
+}
+
+.txn-refund-summary strong {
+  font-size: 1.1rem;
+  color: #0f172a !important;
+}
+
+.refund-modal-body {
+  padding: 1.5rem;
+}
+
+.refund-modal-body .form-group {
+  margin-bottom: 1.1rem;
+}
+
+.refund-modal-body label,
+.refund-modal-card label {
+  display: block !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin-bottom: 0.4rem !important;
+  opacity: 1 !important;
+}
+
+.refund-modal-body input,
+.refund-modal-body select,
+.refund-modal-body textarea {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 0.65rem 1.15rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-submit-refund {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff !important;
+  border: none;
+  padding: 0.65rem 1.35rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
