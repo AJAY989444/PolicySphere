@@ -47,6 +47,7 @@ const notificationRoutes = require('./routes/notification.routes');
 const aiRoutes = require('./routes/ai.routes');
 const documentRoutes = require('./routes/document.routes');
 const proposalRoutes = require('./routes/proposal.routes');
+const crmRoutes = require('./routes/crm.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -60,6 +61,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/proposals', proposalRoutes);
+app.use('/api/crm', crmRoutes);
+
 
 // ─── Error Handler (must be last) ─────────────────────────
 app.use(errorHandler);

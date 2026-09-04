@@ -265,6 +265,15 @@ input, select, textarea {
   margin-bottom: 4px;
 }
 
+.modal-backdrop label,
+.modal-backdrop .form-label,
+.modal-content label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
+
+
 .form-input, input, select, textarea {
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface);

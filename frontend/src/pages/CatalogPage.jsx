@@ -4,6 +4,7 @@ import { HiSearch, HiFilter, HiArrowRight, HiShieldCheck, HiCalculator, HiScale 
 import api from '../services/api/axios';
 import PolicyCompareModal from '../components/catalog/PolicyCompareModal';
 import QuoteCalculatorModal from '../components/catalog/QuoteCalculatorModal';
+import RequestAdvisorModal from '../components/catalog/RequestAdvisorModal';
 import PaymentModal from '../components/payment/PaymentModal';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -41,6 +42,8 @@ function CatalogPage() {
   const [selectedQuotePolicy, setSelectedQuotePolicy] = useState(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [checkoutPolicy, setCheckoutPolicy] = useState(null);
+  const [isAdvisorModalOpen, setIsAdvisorModalOpen] = useState(false);
+
 
   const handleProceedFromQuote = ({ policy, customPremium }) => {
     setIsQuoteOpen(false);
@@ -178,9 +181,12 @@ function CatalogPage() {
             <h1>Find Your Perfect <span className="text-gradient">Insurance Plan</span></h1>
             <p>Browse through our curated collection of insurance policies from India's top providers. Compare coverage, premiums, and features to find the plan that fits you best.</p>
             
-            <div className="catalog-hero-actions mt-4">
+            <div className="catalog-hero-actions mt-4" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <button className="btn btn-primary" onClick={() => setIsQuoteOpen(true)}>
                 <HiCalculator /> Get Custom Instant Quote
+              </button>
+              <button className="btn btn-secondary" onClick={() => setIsAdvisorModalOpen(true)}>
+                📞 Talk to an Advisor
               </button>
             </div>
           </div>
@@ -363,6 +369,12 @@ function CatalogPage() {
         onProceedToCheckout={handleProceedFromQuote}
       />
 
+      <RequestAdvisorModal
+        isOpen={isAdvisorModalOpen}
+        onClose={() => setIsAdvisorModalOpen(false)}
+        defaultCategory={activeCategory !== 'ALL' ? activeCategory : 'HEALTH'}
+      />
+
       <PaymentModal
         policy={checkoutPolicy}
         isOpen={isPaymentOpen}
@@ -372,6 +384,7 @@ function CatalogPage() {
           navigate('/dashboard');
         }}
       />
+
     </div>
   );
 }

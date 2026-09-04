@@ -20,6 +20,7 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import MyProposalsPage from './pages/MyProposalsPage';
 import ProposalWizardPage from './pages/ProposalWizardPage';
 import SmartAdvisorPage from './pages/SmartAdvisorPage';
+import AdvisorCrmPage from './pages/AdvisorCrmPage';
 
 function App() {
   return (
@@ -51,8 +52,10 @@ function App() {
 
         {/* Staff & Admin Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'ADVISOR']} />}>
+          <Route path="advisor/crm" element={<AdvisorCrmPage />} />
           <Route path="admin/analytics" element={<AnalyticsPage />} />
         </Route>
+
 
         {/* Admin Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>

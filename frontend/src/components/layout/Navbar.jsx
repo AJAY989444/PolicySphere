@@ -114,6 +114,15 @@ function Navbar() {
                 <>
                   <li>
                     <NavLink
+                      to="/advisor/crm"
+                      className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      💼 Sales CRM
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
                       to="/advisor"
                       className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
                       onClick={() => setMobileOpen(false)}
@@ -132,6 +141,7 @@ function Navbar() {
                   </li>
                 </>
               )}
+
               {user.role === 'ADMIN' && (
                 <li>
                   <NavLink
