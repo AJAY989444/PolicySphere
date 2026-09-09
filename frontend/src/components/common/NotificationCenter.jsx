@@ -232,6 +232,18 @@ function NotificationCenter() {
               ))
             )}
           </div>
+
+          <div className="notif-dropdown-footer">
+            <button
+              className="btn-view-all-notifs"
+              onClick={() => {
+                setIsOpen(false);
+                navigate('/notifications');
+              }}
+            >
+              Open Multi-Channel Hub & Logs →
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -78,17 +78,35 @@ class PaymentService {
       { timeout: 15000 }
     );
 
-    // Trigger In-App Notification using NotificationService (respects user preferences)
+    // Trigger Multi-Channel Notifications for Purchase and Payment Success (Email, SMS, WhatsApp, Push, In-App)
     try {
-      await NotificationService.createNotification({
+      await NotificationService.dispatchMultiChannelEvent({
         userId,
-        title: 'Policy Purchased Successfully',
-        message: `Your payment of ₹${policy.premium.toLocaleString()} for ${policy.name} was successful. Transaction Ref: ${transactionRef}`,
-        type: 'POLICY_ISSUED',
-        linkUrl: '/dashboard',
+        eventType: 'PURCHASE',
+        data: {
+          policyName: policy.name,
+          provider: policy.provider,
+          policyNumber: result.userPolicy.policyNumber,
+          coverageAmount: policy.coverageAmount,
+          premium: policy.premium,
+          transactionRef,
+          amount: policy.premium,
+          paymentMethod,
+        },
+      });
+
+      await NotificationService.dispatchMultiChannelEvent({
+        userId,
+        eventType: 'PAYMENT_SUCCESS',
+        data: {
+          policyName: policy.name,
+          amount: policy.premium,
+          transactionRef,
+          paymentMethod,
+        },
       });
     } catch (notifErr) {
-      console.warn('Failed to create purchase notification:', notifErr.message);
+      console.warn('Failed to dispatch purchase notifications:', notifErr.message);
     }
 
     return result;

@@ -57,7 +57,7 @@ export default function MyProposalsPage() {
     return (
       <div className="my-proposals-page text-center py-5">
         <div className="spinner-border text-primary" role="status"></div>
-        <p className="mt-3 text-light">Loading your insurance applications...</p>
+        <p className="mt-3 text-secondary">Loading your insurance applications...</p>
       </div>
     );
   }
@@ -77,8 +77,8 @@ export default function MyProposalsPage() {
       {error && <div className="alert alert-danger">{error}</div>}
 
       {proposals.length === 0 ? (
-        <div className="text-center py-5 bg-dark rounded-4 border border-secondary p-5">
-          <h3 className="text-light mb-3">No Active Applications Found</h3>
+        <div className="text-center py-5 bg-white rounded-4 border border-light p-5 shadow-sm">
+          <h3 className="text-dark mb-3">No Active Applications Found</h3>
           <p className="text-muted mb-4">Browse our insurance catalog and click "Apply Now" to start a digital proposal wizard.</p>
           <Link to="/catalog" className="btn btn-outline-primary rounded-pill px-4">
             Explore Policies

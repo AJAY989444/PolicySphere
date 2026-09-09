@@ -29,6 +29,7 @@ model User {
   userPolicies  UserPolicy[]
   payments      PaymentTransaction[]
   notifications Notification[]
+  deliveryLogs  NotificationDeliveryLog[]
   proposals     Proposal[]
   assignedLeads  Lead[]               @relation("AdvisorLeads")
   leadActivities LeadActivity[]
@@ -261,8 +262,12 @@ model PaymentReconciliationLog {
 // ─── Notifications ─────────────────────────────────────────
 
 enum NotificationType {
+  OTP
+  PURCHASE
+  RENEWAL
   CLAIM_UPDATE
   PAYMENT_SUCCESS
+  REMINDER
   POLICY_ISSUED
   RENEWAL_REMINDER
   KYC_UPDATE
@@ -270,19 +275,55 @@ enum NotificationType {
   SYSTEM
 }
 
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+  IN_APP
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
 model Notification {
-  id        String           @id @default(cuid())
-  userId    String           @map("user_id")
+  id        String              @id @default(cuid())
+  userId    String              @map("user_id")
   title     String
   message   String
-  type      NotificationType @default(SYSTEM)
-  isRead    Boolean          @default(false) @map("is_read")
-  linkUrl   String?          @map("link_url")
-  createdAt DateTime         @default(now()) @map("created_at")
+  type      NotificationType    @default(SYSTEM)
+  channel   NotificationChannel @default(IN_APP)
+  isRead    Boolean             @default(false) @map("is_read")
+  linkUrl   String?             @map("link_url")
+  createdAt DateTime            @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveryLogs NotificationDeliveryLog[]
 
   @@map("notifications")
+}
+
+model NotificationDeliveryLog {
+  id               String              @id @default(cuid())
+  userId           String              @map("user_id")
+  notificationId   String?             @map("notification_id")
+  channel          NotificationChannel
+  eventType        NotificationType    @map("event_type")
+  recipient        String
+  subject          String
+  contentSnippet   String              @map("content_snippet")
+  status           DeliveryStatus      @default(DELIVERED)
+  deliveryMetadata Json                @default("{}") @map("delivery_metadata")
+  createdAt        DateTime            @default(now()) @map("created_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notification Notification? @relation(fields: [notificationId], references: [id], onDelete: SetNull)
+
+  @@map("notification_delivery_logs")
 }
 
 // ─── CRM & Advisor Management ──────────────────────────────

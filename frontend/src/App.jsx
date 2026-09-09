@@ -23,6 +23,7 @@ import SmartAdvisorPage from './pages/SmartAdvisorPage';
 import AdvisorCrmPage from './pages/AdvisorCrmPage';
 import UnderwritingPage from './pages/UnderwritingPage';
 import PaymentReconciliationPage from './pages/PaymentReconciliationPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="proposals" element={<MyProposalsPage />} />
           <Route path="proposals/wizard" element={<ProposalWizardPage />} />
           <Route path="proposals/wizard/:proposalId" element={<ProposalWizardPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="advisor" element={<AdvisorDashboardPage />} />
         </Route>
 

@@ -267,6 +267,43 @@
 - **Point 8**: Document Evidence Upload & File Management ✅
 - **Point 9**: System Analytics, Reporting & Performance Metrics ✅
 - **Point 10**: Final System Polish, Production Readiness & Project Handover ✅
+- **Point 14 (Module 14)**: Multi-Channel Notification System (Email, SMS, WhatsApp, Push, In-App) ✅
+
+---
+
+## Point 14: Multi-Channel Notification System (Module 14)
+**Status:** Complete  
+**Date:** 2026-09-09
+
+### What was built
+- **Database Architecture (`schema.prisma`)**:
+  - Expanded `NotificationType` enum: `OTP`, `PURCHASE`, `RENEWAL`, `CLAIM_UPDATE`, `PAYMENT_SUCCESS`, `REMINDER`, `POLICY_ISSUED`, `RENEWAL_REMINDER`, `KYC_UPDATE`, `PROPOSAL_LOCK_EXPIRING`, `SYSTEM`.
+  - Added `NotificationChannel` enum (`EMAIL`, `SMS`, `WHATSAPP`, `PUSH`, `IN_APP`) and `DeliveryStatus` enum (`PENDING`, `SENT`, `DELIVERED`, `FAILED`).
+  - Added `NotificationDeliveryLog` model recording audit records for every dispatched message with channel, recipient, subject, content snippet, status, and metadata.
+  - Successfully migrated and synchronized with Neon PostgreSQL.
+- **Multi-Channel Dispatch Engines (`backend/src/services/channels`)**:
+  - `email.channel.js`: Responsive HTML email layouts with Nodemailer and branded templates for OTP, Purchase packs, Renewal notices, Claim updates, and Invoices.
+  - `sms.channel.js`: Transactional SMS formatting compliant with telecom sender ID standards (`POLSPH`).
+  - `whatsapp.channel.js`: WhatsApp Business templates with interactive CTA buttons (1-click renew, download e-Card, claim details).
+  - `push.channel.js`: Web push notification payload generator with action buttons and badge icons.
+- **Unified Notification Hub Service (`notification.service.js`)**:
+  - `dispatchMultiChannelEvent`: Orchestrates delivery across all channels respecting user preferences (`notificationPreferences`).
+  - `sendOtpNotification` & `verifyOtpCode`: End-to-end security OTP cycle with in-memory TTL store.
+  - `triggerRenewalCheck`: Scans expiring policies within 30 days and sends renewal notices.
+  - `getDeliveryLogs`: Queries delivery audit logs and channel statistics.
+- **Backend APIs (`notification.routes.js` & `notification.controller.js`)**:
+  - `GET /api/notifications`: Feed with category filtering.
+  - `GET /api/notifications/preferences` & `PUT /api/notifications/preferences`: Granular channel & event preference controls.
+  - `GET /api/notifications/delivery-logs`: Full delivery audit trail per channel.
+  - `POST /api/notifications/test-dispatch`: Multi-channel test simulator trigger.
+  - `POST /api/notifications/trigger-renewals`: Automated renewal checker.
+  - `POST /api/notifications/send-otp` & `POST /api/notifications/verify-otp`: Verification endpoints.
+- **Frontend Notification Hub (`NotificationsPage.jsx` & CSS)**:
+  - Full `/notifications` page with KPI overview cards and dual view: In-App Feed vs Multi-Channel Delivery Logs.
+  - `NotificationPreferencesModal.jsx`: Granular toggle switches for Email, SMS, WhatsApp, Push, and In-App, plus event subscriptions.
+  - `NotificationSimulatorModal.jsx`: Interactive live simulator with device mockups (Desktop HTML Email, Smartphone SMS screen, WhatsApp chat bubble with interactive buttons, and Web Push card).
+  - Upgraded Navbar `NotificationCenter.jsx` dropdown with channel origin tags and Hub footer link.
+
 
 
 

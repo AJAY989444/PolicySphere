@@ -110,6 +110,15 @@ function Navbar() {
                   Billing
                 </NavLink>
               </li>
+              <li>
+                <NavLink
+                  to="/notifications"
+                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Notifications
+                </NavLink>
+              </li>
               {(user.role === 'ADVISOR' || user.role === 'ADMIN') && (
                 <>
                   <li>

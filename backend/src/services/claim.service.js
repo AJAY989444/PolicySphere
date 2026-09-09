@@ -118,14 +118,20 @@ const updateClaimStatus = async (claimId, status) => {
     }
   });
 
-  // Trigger Notification for User using NotificationService (respects user preferences)
+  // Trigger Multi-Channel Notification for User (Email, SMS, WhatsApp, Push, In-App)
   if (claim.userPolicy?.userId) {
-    await NotificationService.createNotification({
+    await NotificationService.dispatchMultiChannelEvent({
       userId: claim.userPolicy.userId,
-      title: `Claim ${status}`,
-      message: `Your insurance claim for ${claim.userPolicy.policy?.name || 'policy'} of $${claim.amount.toLocaleString()} has been ${status.toLowerCase()}.`,
-      type: 'CLAIM_UPDATE',
-      linkUrl: '/claims',
+      eventType: 'CLAIM_UPDATE',
+      data: {
+        claimId: claim.id,
+        claimStatus: status,
+        policyName: claim.userPolicy.policy?.name || 'Insurance Plan',
+        amount: claim.amount,
+        title: `Claim ${status}`,
+        message: `Your insurance claim for ${claim.userPolicy.policy?.name || 'policy'} of $${claim.amount.toLocaleString()} has been ${status.toLowerCase()}.`,
+        linkUrl: '/claims',
+      },
     }).catch(err => console.error('Notification error:', err));
   }
 
