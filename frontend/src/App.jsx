@@ -24,6 +24,9 @@ import AdvisorCrmPage from './pages/AdvisorCrmPage';
 import UnderwritingPage from './pages/UnderwritingPage';
 import PaymentReconciliationPage from './pages/PaymentReconciliationPage';
 import NotificationsPage from './pages/NotificationsPage';
+import SearchResultsPage from './pages/SearchResultsPage';
+import CustomerSupportPage from './pages/CustomerSupportPage';
+import SupportDeskPage from './pages/SupportDeskPage';
 
 function App() {
   return (
@@ -36,10 +39,11 @@ function App() {
         {/* Public Catalog & Comparison Workspace */}
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="catalog/:id" element={<PolicyDetailPage />} />
+        <Route path="search" element={<SearchResultsPage />} />
         <Route path="compare" element={<ComparePage />} />
         <Route path="smart-advisor" element={<SmartAdvisorPage />} />
+        <Route path="support" element={<CustomerSupportPage />} />
 
-        
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="dashboard" element={<DashboardPage />} />
@@ -58,6 +62,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'ADVISOR']} />}>
           <Route path="underwriting" element={<UnderwritingPage />} />
           <Route path="advisor/crm" element={<AdvisorCrmPage />} />
+          <Route path="admin/support" element={<SupportDeskPage />} />
           <Route path="admin/analytics" element={<AnalyticsPage />} />
           <Route path="admin/reconciliation" element={<PaymentReconciliationPage />} />
           <Route path="admin" element={<AdminDashboardPage />} />

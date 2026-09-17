@@ -268,41 +268,83 @@
 - **Point 9**: System Analytics, Reporting & Performance Metrics ✅
 - **Point 10**: Final System Polish, Production Readiness & Project Handover ✅
 - **Point 14 (Module 14)**: Multi-Channel Notification System (Email, SMS, WhatsApp, Push, In-App) ✅
+- **Point 15 (Module 15)**: AI Engine (Recommendation, Premium Prediction, Claim Probability, Fraud Detection, Chatbot, Voice Assistant, Policy Explanation, Risk Scoring) ✅
+- **Point 16 (Module 16)**: Search Engine (Full-Text, Auto-Complete <30ms, Typo Tolerance, Insurance Synonyms, Voice Search, Semantic Search, Analytics <500ms) ✅
+- **Point 17 (Module 17)**: Enterprise Insurance Sales CRM (Multi-Channel Leads, Dynamic Scoring, Workload Auto-Assignment, 360° Drawer, Dialer, Meetings, Email Tracking, Conversion Funnel, Leaderboard) ✅
 
 ---
 
-## Point 14: Multi-Channel Notification System (Module 14)
+## Point 16: Search Engine (Module 16)
 **Status:** Complete  
-**Date:** 2026-09-09
+**Date:** 2026-09-11
 
 ### What was built
 - **Database Architecture (`schema.prisma`)**:
-  - Expanded `NotificationType` enum: `OTP`, `PURCHASE`, `RENEWAL`, `CLAIM_UPDATE`, `PAYMENT_SUCCESS`, `REMINDER`, `POLICY_ISSUED`, `RENEWAL_REMINDER`, `KYC_UPDATE`, `PROPOSAL_LOCK_EXPIRING`, `SYSTEM`.
-  - Added `NotificationChannel` enum (`EMAIL`, `SMS`, `WHATSAPP`, `PUSH`, `IN_APP`) and `DeliveryStatus` enum (`PENDING`, `SENT`, `DELIVERED`, `FAILED`).
-  - Added `NotificationDeliveryLog` model recording audit records for every dispatched message with channel, recipient, subject, content snippet, status, and metadata.
-  - Successfully migrated and synchronized with Neon PostgreSQL.
-- **Multi-Channel Dispatch Engines (`backend/src/services/channels`)**:
-  - `email.channel.js`: Responsive HTML email layouts with Nodemailer and branded templates for OTP, Purchase packs, Renewal notices, Claim updates, and Invoices.
-  - `sms.channel.js`: Transactional SMS formatting compliant with telecom sender ID standards (`POLSPH`).
-  - `whatsapp.channel.js`: WhatsApp Business templates with interactive CTA buttons (1-click renew, download e-Card, claim details).
-  - `push.channel.js`: Web push notification payload generator with action buttons and badge icons.
-- **Unified Notification Hub Service (`notification.service.js`)**:
-  - `dispatchMultiChannelEvent`: Orchestrates delivery across all channels respecting user preferences (`notificationPreferences`).
-  - `sendOtpNotification` & `verifyOtpCode`: End-to-end security OTP cycle with in-memory TTL store.
-  - `triggerRenewalCheck`: Scans expiring policies within 30 days and sends renewal notices.
-  - `getDeliveryLogs`: Queries delivery audit logs and channel statistics.
-- **Backend APIs (`notification.routes.js` & `notification.controller.js`)**:
-  - `GET /api/notifications`: Feed with category filtering.
-  - `GET /api/notifications/preferences` & `PUT /api/notifications/preferences`: Granular channel & event preference controls.
-  - `GET /api/notifications/delivery-logs`: Full delivery audit trail per channel.
-  - `POST /api/notifications/test-dispatch`: Multi-channel test simulator trigger.
-  - `POST /api/notifications/trigger-renewals`: Automated renewal checker.
-  - `POST /api/notifications/send-otp` & `POST /api/notifications/verify-otp`: Verification endpoints.
-- **Frontend Notification Hub (`NotificationsPage.jsx` & CSS)**:
-  - Full `/notifications` page with KPI overview cards and dual view: In-App Feed vs Multi-Channel Delivery Logs.
-  - `NotificationPreferencesModal.jsx`: Granular toggle switches for Email, SMS, WhatsApp, Push, and In-App, plus event subscriptions.
-  - `NotificationSimulatorModal.jsx`: Interactive live simulator with device mockups (Desktop HTML Email, Smartphone SMS screen, WhatsApp chat bubble with interactive buttons, and Web Push card).
-  - Upgraded Navbar `NotificationCenter.jsx` dropdown with channel origin tags and Hub footer link.
+  - Added `SearchQueryLog` model recording user queries, cleaned queries, detected intents (`KEYWORD`, `SYNONYM`, `AI_SEMANTIC`), matched category, execution latency in milliseconds, typo corrections, and user agent info.
+  - Linked `SearchQueryLog` to `User` model with `searchLogs` relation.
+  - Successfully pushed and synchronized with Neon PostgreSQL.
+- **Backend Search Service & Controller (`search.service.js`, `search.controller.js`, `search.routes.js`)**:
+  - **Full-Text Inverted Search**: Multi-field scoring across policy titles (weight 15), categories (weight 12), providers (weight 10), features (weight 8), and descriptions (weight 4) with phrase match bonuses (weight 40/25).
+  - **Auto-Complete (<30ms SLA)**: Sub-millisecond prefix suggestion engine returning matching policies, category chips, provider tags, and instant policy cards.
+  - **Typo Tolerance & Fuzzy Search**: Damerau-Levenshtein distance algorithm correcting misspellings (e.g. "helath" $\to$ "health", "motr" $\to$ "motor", "cancr" $\to$ "cancer") with automatic fallback scoring and "Did you mean...?" banners.
+  - **Insurance Domain Synonym Dictionary**: Synonym expansion mapping terms like *mediclaim*, *cashless*, *hospitalization* $\to$ Health; *two-wheeler*, *bike*, *zero dep* $\to$ Motor; *death benefit*, *pure term* $\to$ Life; *schengen*, *overseas* $\to$ Travel; *burglary*, *fire* $\to$ Home.
+  - **AI Semantic Natural Language Parser**: Entity extractor parsing natural queries (e.g. *"Cheapest health policy under 15k for 45 year old with diabetes"*) into structured filters (`category: HEALTH`, `maxBudget: 15000`, `age: 45`, `condition: diabetes`, `sort: premium_asc`) with Semantic Match Quality % score.
+  - **Search Analytics & Trending Searches**: Logs search events, tracks execution latency, and surfaces platform-wide trending search chips.
+  - **SLA In-Memory Policy Cache**: Cached active policies in memory, achieving **1ms autocomplete** and **4ms search latency** (comfortably beating the Section 28 SLA < 500ms).
+- **Frontend UI (`OmniSearchBar.jsx`, `GlobalSearchModal.jsx`, `SearchResultsPage.jsx` & CSS)**:
+  - **OmniSearchBar**: Autocomplete dropdown, Web Speech API Voice Search with waveform pulse, Did-You-Mean chips, and search history.
+  - **GlobalSearchModal (`Ctrl + K` / `Cmd + K`)**: Command palette with instant shortcuts.
+  - **Dedicated Search Results Page (`/search`)**: SLA latency badges, highlight keywords, faceted filtering, and side-by-side comparison modal flow.
+- **Verification**:
+  - 34/34 automated test assertions passed (`scratch/test-search-engine.js`).
+  - Frontend production build verified (`npm run build`) with 0 errors.
+
+---
+
+## Point 17: Enterprise Insurance Sales CRM (Module 17)
+**Status:** Complete  
+**Date:** 2026-09-15
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added new PostgreSQL enums: `LeadPriority` (`HOT`, `WARM`, `COLD`), `LeadSource` (`CATALOG_INQUIRY`, `SMART_ADVISOR`, `LANDING_PAGE`, `REFERRAL`, `MANUAL`), `CustomerSentiment` (`READY_TO_BUY`, `INTERESTED`, `HESITANT`, `PRICE_SENSITIVE`, `NOT_INTERESTED`), `FollowUpStatus` (`PENDING`, `COMPLETED`, `CANCELLED`), `FollowUpPriority` (`HIGH`, `MEDIUM`, `LOW`), `CallOutcome` (`CONNECTED`, `VOICEMAIL`, `BUSY`, `SCHEDULED_CALLBACK`, `WRONG_NUMBER`), `MeetingStatus` (`SCHEDULED`, `COMPLETED`, `CANCELLED`), `EmailStatus` (`SENT`, `DELIVERED`, `OPENED`, `CLICKED`, `BOUNCED`).
+  - Extended `Lead` model with fields `source`, `priority`, `leadScore`, `sentiment`, `pinnedNotes`, `policyId`, and established relational mappings to follow-ups, calls, meetings, and email logs.
+  - Created 4 dedicated relational models:
+    - `LeadFollowUp`: Tracks tasks, scheduled reminder dates, priority levels, and completion timestamps.
+    - `LeadCall`: Records simulated call logs, duration in seconds, outcome category, notes, and call audio placeholders.
+    - `LeadMeeting`: Manages video consultations, scheduled timestamps, duration in minutes, generated meeting URLs (`https://meet.policysphere.com/...`), agendas, and meeting notes.
+    - `LeadEmailLog`: Tracks dispatched insurance template emails, recipient addresses, subject lines, body text, and open/click timestamps.
+  - Successfully synchronized and pushed migrations to Neon PostgreSQL (`npx prisma db push`).
+- **Backend Services, Controllers & Routes (`crm.service.js`, `crm.controller.js`, `crm.routes.js`)**:
+  - **Dynamic Lead Scoring Algorithm**: Automatically calculates real-time qualification score (0–100) based on budget tiers, channel attribution, interaction frequency, and buyer sentiment tags.
+  - **Workload-Balanced Auto-Assignment**: Intelligently assigns incoming leads to the advisor with the lowest current active pipeline, preventing bottlenecks.
+  - **Lead Reassignment & Audit Trail**: Enables reassigning leads between advisors with complete history logged in `LeadActivity`.
+  - **Follow-up & Task Queue**: Real-time queries for due-today, overdue, and upcoming follow-ups with one-click completion handler.
+  - **Interactive Call Simulator & Logging**: Full call recording workflow tracking outcome states, duration timer, and structured discussion notes.
+  - **Video Consultation Scheduler**: Schedules client meetings with auto-generated secure video conference URLs.
+  - **Insurance Email Templates & Tracking**: Supports 4 standard templates (`QUOTE_FOLLOWUP`, `TAX_SAVER_80D`, `KYC_REMINDER`, `WELCOME_ONBOARDING`) with variable placeholder interpolation (`{{customerName}}`, `{{policyName}}`, `{{advisorName}}`) and open/click simulation.
+  - **Conversion Funnel Analytics & Advisor Leaderboard**:
+    - 6-stage sales funnel with drop-off and conversion rates.
+    - Sales cycle velocity tracking average days from inquiry to policy issuance.
+    - Lead source attribution ROI breakdown.
+    - Advisor performance leaderboard with converted deal counts, conversion rates, and total commission earnings.
+    - Full CSV export generating clean spreadsheet reports.
+- **Frontend UI (`AdvisorCrmPage.jsx`, `AdvisorCrmPage.css`)**:
+  - **Kanban Board**: 6-stage drag-and-progress pipeline with stage budget totals, hot/warm/cold priority badges, and score chips.
+  - **Data Table View**: Complete searchable and filterable table with customer sentiment, source attribution, and advisor tags.
+  - **Follow-ups Queue**: Segmented views for Overdue, Due Today, and Upcoming tasks with one-click completion.
+  - **Conversion Reports & Sales Analytics**: Visual conversion funnel progress bars, KPI metrics (Average Cycle Days, Total Pipeline, Won Revenue), source attribution ROI table, and advisor leaderboard with CSV export button.
+  - **Lead 360° Drawer**: Slide-over panel featuring activity timeline, direct quick-note logging, follow-ups tab, call records, video meeting links, and dispatched email logs.
+  - **Modals**:
+    - Click-to-Call Simulator modal with live timer counter and outcome dropdown.
+    - Video Meeting Scheduler modal with agenda and meeting URL generator.
+    - Template Email Composer modal with template selection and subject/body editor.
+    - Follow-up Task modal with date/time pickers and priority levels.
+    - Reassign Lead modal with advisor workload display.
+    - Add New Lead modal with automatic lead scoring.
+- **Verification**:
+  - All 35 automated test assertions passed (`scratch/test-crm-engine.js`).
+  - Production build verified (`npm run build`) with 0 errors.
 
 
 
@@ -310,3 +352,46 @@
 
 
 
+
+
+
+
+---
+
+## Point 18: Omnichannel Support Center & SLA Engine (Module 18)
+**Status:** Complete  
+**Date:** 2026-09-16
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added 8 PostgreSQL enums: `SupportCategory`, `TicketPriority`, `TicketStatus`, `SupportChannel`, `EscalationTier`, `MessageSenderType`, `ChatSessionStatus`, `CallbackStatus`.
+  - Added 6 dedicated models: `SupportTicket`, `TicketMessage`, `KnowledgeArticle`, `TicketEscalationLog`, `LiveChatSession`, `VoiceCallbackRequest`.
+  - Migrated to Neon PostgreSQL (`npx prisma db push`) and generated Prisma Client.
+- **Backend Services, Controllers & Routes (`support.service.js`, `support.controller.js`, `support.routes.js`)**:
+  - Dynamic SLA calculation by priority (Urgent 1h/4h, High 4h/12h, Medium 8h/24h, Low 24h/48h).
+  - Workload-balanced auto-assignment to active advisors/admins with lowest open queue.
+  - Real-time AI deflection matching Knowledge Base articles to customer query.
+  - Automated SLA breach sweeper detecting overdue tickets and escalating to Tier 2.
+  - Role-based privacy filtering internal notes (`isInternalNote: true`) from customer visibility.
+  - Customer CSAT rating (1–5 stars) and feedback on resolved tickets.
+  - SphereSupport AI chat response engine and multi-channel simulators (Live Chat, WhatsApp, Voice Callback).
+- **Frontend Customer Support Portal (`CustomerSupportPage.jsx`, `CustomerSupportPage.css`)**:
+  - Ingestion channels hero (Knowledge Base, Tickets, SphereSupport AI, Callback, WhatsApp).
+  - Knowledge Base with category filter pills, search bar, article modal, and helpfulness voting.
+  - Ticket Creation modal with live AI deflection banner.
+  - Customer Tickets list with SLA timers, status badges, message thread, and 5-star CSAT rating card.
+  - Floating SphereSupport AI chat drawer with automatic ticket escalation trigger.
+  - Voice Callback and WhatsApp simulator modals.
+- **Frontend Staff Support Desk (`SupportDeskPage.jsx`, `SupportDeskPage.css`)**:
+  - SLA KPI dashboard (Active tickets, Breached count, SLA compliance %, Avg CSAT, FRT, MTTR).
+  - One-click SLA breach audit sweeper.
+  - Multi-filter queue (status, priority, tier, search).
+  - Ticket workspace with customer profile, SLA timers, escalation audit trail, and composer with **Public Reply** vs **🔒 Internal Private Note** toggle.
+  - Tier Escalation modal (Tier 1 -> Tier 2 -> Tier 3 with reason).
+  - Voice Callback queue management tab.
+- **Routing & Navigation**:
+  - Routes: `/support` (Customer) and `/admin/support` (Staff Desk).
+  - Nav links added to `Navbar.jsx`.
+- **Verification**:
+  - 45/45 automated backend test assertions passed (100%) (`scratch/test-support-engine.js`).
+  - Frontend production build verified (`npm run build`) with 0 errors.

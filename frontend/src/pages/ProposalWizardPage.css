@@ -143,13 +143,13 @@
   gap: 1.5rem;
 }
 
-.form-group {
+.proposal-wizard-page .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-group label {
+.proposal-wizard-page .form-group label {
   font-size: 0.925rem;
   font-weight: 700;
   color: #f1f5f9 !important;

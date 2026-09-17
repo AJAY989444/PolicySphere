@@ -11,6 +11,10 @@ const config = require('./config');
 
 const app = express();
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // ─── Global Middleware ─────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
@@ -50,6 +54,8 @@ const proposalRoutes = require('./routes/proposal.routes');
 const crmRoutes = require('./routes/crm.routes');
 const underwritingRoutes = require('./routes/underwriting.routes');
 const paymentGatewayRoutes = require('./routes/paymentGateway.routes');
+const searchRoutes = require('./routes/search.routes');
+const supportRoutes = require('./routes/support.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -66,6 +72,8 @@ app.use('/api/proposals', proposalRoutes);
 app.use('/api/crm', crmRoutes);
 app.use('/api/underwriting', underwritingRoutes);
 app.use('/api/payments-engine', paymentGatewayRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/support', supportRoutes);
 
 
 

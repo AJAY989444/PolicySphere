@@ -17,7 +17,7 @@ class AIController {
 
   static async getRecommendations(req, res, next) {
     try {
-      const result = await AIService.calculatePersonalizedRecommendations(req.body || {});
+      const result = await AIService.calculatePersonalizedRecommendations(req.body || {}, req.user?.id);
       return res.json({ success: true, ...result });
     } catch (error) {
       next(error);
@@ -26,7 +26,7 @@ class AIController {
 
   static async getRiskAssessment(req, res, next) {
     try {
-      const result = await AIService.calculateRiskScore(req.body || {});
+      const result = await AIService.calculateRiskScore(req.body || {}, req.user?.id);
       return res.json({ success: true, ...result });
     } catch (error) {
       next(error);
@@ -41,6 +41,46 @@ class AIController {
       }
       const result = await AIService.explainPolicyFinePrint(policyId);
       return res.json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async predictPremium(req, res, next) {
+    try {
+      const result = await AIService.predictPremiumTrajectory(req.body || {}, req.user?.id);
+      return res.json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async claimProbability(req, res, next) {
+    try {
+      const result = await AIService.calculateClaimProbability(req.body || {}, req.user?.id);
+      return res.json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async fraudAnalysis(req, res, next) {
+    try {
+      const result = await AIService.analyzeClaimFraud(req.body || {}, req.user?.id);
+      return res.json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getAssessmentHistory(req, res, next) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required for assessment history.' });
+      }
+      const history = await AIService.getUserAssessments(userId);
+      return res.json({ success: true, history });
     } catch (error) {
       next(error);
     }

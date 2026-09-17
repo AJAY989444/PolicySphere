@@ -6,6 +6,7 @@ import PolicyCompareModal from '../components/catalog/PolicyCompareModal';
 import QuoteCalculatorModal from '../components/catalog/QuoteCalculatorModal';
 import RequestAdvisorModal from '../components/catalog/RequestAdvisorModal';
 import PaymentModal from '../components/payment/PaymentModal';
+import OmniSearchBar from '../components/search/OmniSearchBar';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './CatalogPage.css';
@@ -212,16 +213,17 @@ function CatalogPage() {
 
           {/* Search & Sort */}
           <div className="catalog-controls">
-            <form className="catalog-search" onSubmit={handleSearch}>
-              <HiSearch className="search-icon" />
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Search policies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+            <div style={{ flex: 1, minWidth: '260px' }}>
+              <OmniSearchBar
+                placeholder='Search policies, synonyms, riders (e.g. "mediclaim", "zero dep")...'
+                initialQuery={searchQuery}
+                onSearchSubmit={(q, cat) => {
+                  if (cat) setActiveCategory(cat);
+                  setSearchQuery(q);
+                  navigate(`/search?q=${encodeURIComponent(q || '')}${cat ? `&category=${cat}` : ''}`);
+                }}
               />
-            </form>
+            </div>
             <div className="catalog-sort">
               <HiFilter className="sort-icon" />
               <select

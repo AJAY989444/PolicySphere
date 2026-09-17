@@ -1,12 +1,12 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { HiOutlineMenu, HiOutlineX, HiUserCircle } from 'react-icons/hi';
+import { HiOutlineMenu, HiOutlineX, HiUserCircle, HiSearch } from 'react-icons/hi';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api/axios';
 
 import NotificationCenter from '../common/NotificationCenter';
 
-function Navbar() {
+function Navbar({ onOpenSearch }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [kycDue, setKycDue] = useState(false);
   const { user, logout } = useAuth();
@@ -69,6 +69,24 @@ function Navbar() {
               onClick={() => setMobileOpen(false)}
             >
               <span>⚡</span> Smart Advisor
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/search"
+              className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span style={{ fontSize: '0.9rem' }}>🔍</span> Search
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/support"
+              className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span>🎧</span> Support
             </NavLink>
           </li>
           {user && (
@@ -150,6 +168,15 @@ function Navbar() {
                   </li>
                   <li>
                     <NavLink
+                      to="/admin/support"
+                      className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <span>🎧</span> Support Desk
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
                       to="/advisor"
                       className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
                       onClick={() => setMobileOpen(false)}
@@ -183,6 +210,39 @@ function Navbar() {
 
         {/* Actions */}
         <div className="navbar-actions">
+          <button
+            type="button"
+            className="navbar-search-btn"
+            onClick={onOpenSearch}
+            title="Search policies, riders, synonyms (Ctrl + K)"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              background: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-full)',
+              color: 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              fontSize: 'var(--font-size-sm)',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <HiSearch style={{ fontSize: '1rem', color: 'var(--color-primary)' }} />
+            <span className="hidden-mobile" style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Search</span>
+            <kbd style={{
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '4px',
+              padding: '1px 5px',
+              fontSize: '0.68rem',
+              fontWeight: 600,
+              color: 'var(--color-text-muted)',
+              boxShadow: 'var(--shadow-sm)'
+            }}>Ctrl K</kbd>
+          </button>
+
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
               <NotificationCenter />

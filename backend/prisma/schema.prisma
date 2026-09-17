@@ -34,8 +34,17 @@ model User {
   assignedLeads  Lead[]               @relation("AdvisorLeads")
   leadActivities LeadActivity[]
   commissions    AdvisorCommission[]
+  leadFollowUps  LeadFollowUp[]
+  leadCalls      LeadCall[]
+  leadMeetings   LeadMeeting[]
+  leadEmailLogs  LeadEmailLog[]
   underwritingAssessments UnderwritingAssessment[]
   refunds        RefundTransaction[]
+  aiAssessments  AIAssessmentLog[]
+  searchLogs     SearchQueryLog[]
+  supportTicketsCreated  SupportTicket[]       @relation("CustomerTickets")
+  supportTicketsAssigned SupportTicket[]       @relation("AssignedAgentTickets")
+  ticketMessagesSent     TicketMessage[]
 
   @@map("users")
 }
@@ -170,6 +179,7 @@ model Claim {
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
   userPolicy    UserPolicy  @relation(fields: [userPolicyId], references: [id], onDelete: Cascade)
+  fraudAssessment ClaimFraudAssessment?
 
   @@map("claims")
 }
@@ -337,6 +347,64 @@ enum LeadStage {
   LOST
 }
 
+enum LeadPriority {
+  HOT
+  WARM
+  COLD
+}
+
+enum LeadSource {
+  CATALOG_INQUIRY
+  SMART_ADVISOR
+  LANDING_PAGE
+  REFERRAL
+  MANUAL
+}
+
+enum CustomerSentiment {
+  READY_TO_BUY
+  INTERESTED
+  HESITANT
+  PRICE_SENSITIVE
+  NOT_INTERESTED
+}
+
+enum FollowUpStatus {
+  PENDING
+  COMPLETED
+  MISSED
+  CANCELLED
+}
+
+enum FollowUpPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum CallOutcome {
+  CONNECTED
+  BUSY
+  VOICEMAIL
+  SCHEDULED_CALLBACK
+  WRONG_NUMBER
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+}
+
+enum EmailStatus {
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+}
+
 model Lead {
   id               String            @id @default(cuid())
   advisorId        String?           @map("advisor_id")
@@ -346,12 +414,22 @@ model Lead {
   category         InsuranceCategory @default(HEALTH)
   estimatedBudget  Float?            @map("estimated_budget")
   stage            LeadStage         @default(NEW)
+  source           LeadSource        @default(CATALOG_INQUIRY)
+  priority         LeadPriority      @default(WARM)
+  leadScore        Int               @default(50) @map("lead_score")
+  sentiment        CustomerSentiment @default(INTERESTED)
+  pinnedNotes      String?           @map("pinned_notes")
+  policyId         String?           @map("policy_id")
   notes            String?
   createdAt        DateTime          @default(now()) @map("created_at")
   updatedAt        DateTime          @updatedAt @map("updated_at")
 
   advisor          User?             @relation("AdvisorLeads", fields: [advisorId], references: [id], onDelete: SetNull)
   activities       LeadActivity[]
+  followUps        LeadFollowUp[]
+  calls            LeadCall[]
+  meetings         LeadMeeting[]
+  emailLogs        LeadEmailLog[]
 
   @@map("leads")
 }
@@ -360,7 +438,7 @@ model LeadActivity {
   id          String   @id @default(cuid())
   leadId      String   @map("lead_id")
   advisorId   String   @map("advisor_id")
-  type        String   // NOTE, CALL, EMAIL, MEETING, STAGE_CHANGE
+  type        String   // NOTE, CALL, EMAIL, MEETING, STAGE_CHANGE, REASSIGNMENT
   description String
   createdAt   DateTime @default(now()) @map("created_at")
 
@@ -368,6 +446,78 @@ model LeadActivity {
   advisor User @relation(fields: [advisorId], references: [id], onDelete: Cascade)
 
   @@map("lead_activities")
+}
+
+model LeadFollowUp {
+  id               String         @id @default(cuid())
+  leadId           String         @map("lead_id")
+  advisorId        String         @map("advisor_id")
+  title            String
+  scheduledAt      DateTime       @map("scheduled_at")
+  priority         FollowUpPriority @default(MEDIUM)
+  status           FollowUpStatus @default(PENDING)
+  notes            String?
+  completedAt      DateTime?      @map("completed_at")
+  createdAt        DateTime       @default(now()) @map("created_at")
+
+  lead    Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  advisor User @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+
+  @@map("lead_follow_ups")
+}
+
+model LeadCall {
+  id               String      @id @default(cuid())
+  leadId           String      @map("lead_id")
+  advisorId        String      @map("advisor_id")
+  durationSeconds  Int         @default(0) @map("duration_seconds")
+  outcome          CallOutcome @default(CONNECTED)
+  notes            String?
+  recordingUrl     String?     @map("recording_url")
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  lead    Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  advisor User @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+
+  @@map("lead_calls")
+}
+
+model LeadMeeting {
+  id               String        @id @default(cuid())
+  leadId           String        @map("lead_id")
+  advisorId        String        @map("advisor_id")
+  title            String
+  scheduledAt      DateTime      @map("scheduled_at")
+  durationMinutes  Int           @default(30) @map("duration_minutes")
+  meetingLink      String?       @map("meeting_link")
+  agenda           String?
+  status           MeetingStatus @default(SCHEDULED)
+  outcomeNotes     String?       @map("outcome_notes")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  lead    Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  advisor User @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+
+  @@map("lead_meetings")
+}
+
+model LeadEmailLog {
+  id               String      @id @default(cuid())
+  leadId           String      @map("lead_id")
+  advisorId        String      @map("advisor_id")
+  recipientEmail   String      @map("recipient_email")
+  subject          String
+  body             String
+  templateName     String?     @map("template_name")
+  status           EmailStatus @default(SENT)
+  openedAt         DateTime?   @map("opened_at")
+  clickedAt        DateTime?   @map("clicked_at")
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  lead    Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  advisor User @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+
+  @@map("lead_email_logs")
 }
 
 model AdvisorCommission {
@@ -441,6 +591,257 @@ model ComplianceAuditLog {
   assessment UnderwritingAssessment? @relation(fields: [assessmentId], references: [id], onDelete: SetNull)
 
   @@map("compliance_audit_logs")
+}
+
+// ─── AI Engine & Predictive Analytics ──────────────────────
+
+enum FraudRiskLevel {
+  LOW
+  ELEVATED
+  HIGH_RISK
+}
+
+model AIAssessmentLog {
+  id             String   @id @default(cuid())
+  userId         String?  @map("user_id")
+  assessmentType String   @map("assessment_type") // RECOMMENDATION, RISK_SCORE, PREMIUM_PREDICTION, CLAIM_PROBABILITY, FRAUD_ANALYSIS
+  inputData      Json     @map("input_data")
+  resultData     Json     @map("result_data")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("ai_assessment_logs")
+}
+
+model ClaimFraudAssessment {
+  id              String         @id @default(cuid())
+  claimId         String?        @unique @map("claim_id")
+  proposalId      String?        @map("proposal_id")
+  fraudScore      Float          @map("fraud_score") // 0.0 to 100.0
+  riskTier        FraudRiskLevel @default(LOW) @map("risk_tier")
+  indicators      Json           @default("[]") // Array of detected red flags / anomalies
+  recommendation  String         // e.g. "FAST_TRACK_APPROVED", "MANUAL_INVESTIGATION", "REJECT_SUSPICIOUS"
+  analysisDetails Json           @default("{}") @map("analysis_details")
+  reviewedBy      String?        @map("reviewed_by")
+  reviewedAt      DateTime?      @map("reviewed_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  claim           Claim?         @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  @@map("claim_fraud_assessments")
+}
+
+// ─── Module 16: Search Engine ──────────────────────────────
+
+model SearchQueryLog {
+  id                 String             @id @default(cuid())
+  userId             String?            @map("user_id")
+  query              String
+  cleanedQuery       String?            @map("cleaned_query")
+  intent             String?            @default("KEYWORD") // KEYWORD, AI_SEMANTIC, CATEGORY, SYNONYM, VOICE
+  matchedCategory    InsuranceCategory? @map("matched_category")
+  resultsCount       Int                @default(0) @map("results_count")
+  executionMs        Int                @default(0) @map("execution_ms")
+  hasTypoCorrection  Boolean            @default(false) @map("has_typo_correction")
+  correctedQuery     String?            @map("corrected_query")
+  userAgent          String?            @map("user_agent")
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  user               User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([query])
+  @@index([createdAt])
+  @@map("search_query_logs")
+}
+
+// ─── Module 18: Support Center ──────────────────────────────
+
+enum SupportCategory {
+  POLICY_INQUIRY
+  CLAIM_ASSISTANCE
+  PAYMENT_BILLING
+  ENDORSEMENT
+  RENEWAL
+  CANCELLATION_REFUND
+  KYC_VERIFICATION
+  TECHNICAL_SUPPORT
+  GRIEVANCE
+  GENERAL
+}
+
+enum TicketPriority {
+  URGENT
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportChannel {
+  PORTAL
+  LIVE_CHAT
+  WHATSAPP
+  VOICE
+  EMAIL
+}
+
+enum EscalationTier {
+  TIER_1_AGENT
+  TIER_2_SPECIALIST
+  TIER_3_MANAGEMENT
+}
+
+enum MessageSenderType {
+  CUSTOMER
+  AGENT
+  SYSTEM_AI
+}
+
+enum ChatSessionStatus {
+  ACTIVE
+  TRANSFERRED_TO_TICKET
+  CLOSED
+}
+
+enum CallbackStatus {
+  REQUESTED
+  COMPLETED
+  CANCELLED
+}
+
+model SupportTicket {
+  id                   String           @id @default(cuid())
+  ticketNumber         String           @unique @map("ticket_number")
+  userId               String           @map("user_id")
+  assignedToId         String?          @map("assigned_to_id")
+  category             SupportCategory  @default(GENERAL)
+  priority             TicketPriority   @default(MEDIUM)
+  status               TicketStatus     @default(OPEN)
+  channel              SupportChannel   @default(PORTAL)
+  subject              String
+  description          String           @db.Text
+  relatedPolicyId      String?          @map("related_policy_id")
+  relatedClaimId       String?          @map("related_claim_id")
+  slaFirstResponseDue  DateTime         @map("sla_first_response_due")
+  slaResolutionDue     DateTime         @map("sla_resolution_due")
+  firstResponseAt      DateTime?        @map("first_response_at")
+  resolvedAt           DateTime?        @map("resolved_at")
+  slaBreached          Boolean          @default(false) @map("sla_breached")
+  escalationTier       EscalationTier   @default(TIER_1_AGENT) @map("escalation_tier")
+  escalationReason     String?          @map("escalation_reason")
+  csatRating           Int?             @map("csat_rating")
+  csatFeedback         String?          @map("csat_feedback")
+  tags                 Json             @default("[]")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+
+  user                 User             @relation("CustomerTickets", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTo           User?            @relation("AssignedAgentTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages             TicketMessage[]
+  escalationLogs       TicketEscalationLog[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([slaBreached])
+  @@index([createdAt])
+  @@map("support_tickets")
+}
+
+model TicketMessage {
+  id             String            @id @default(cuid())
+  ticketId       String            @map("ticket_id")
+  senderId       String?           @map("sender_id")
+  senderType     MessageSenderType @default(CUSTOMER) @map("sender_type")
+  isInternalNote Boolean           @default(false) @map("is_internal_note")
+  message        String            @db.Text
+  attachments    Json              @default("[]")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  ticket         SupportTicket     @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender         User?             @relation(fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@index([createdAt])
+  @@map("ticket_messages")
+}
+
+model KnowledgeArticle {
+  id              String          @id @default(cuid())
+  slug            String          @unique
+  title           String
+  category        SupportCategory @default(GENERAL)
+  summary         String          @db.Text
+  content         String          @db.Text
+  tags            Json            @default("[]")
+  viewCount       Int             @default(0) @map("view_count")
+  helpfulCount    Int             @default(0) @map("helpful_count")
+  notHelpfulCount Int             @default(0) @map("not_helpful_count")
+  isPublished     Boolean         @default(true) @map("is_published")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([slug])
+  @@map("knowledge_articles")
+}
+
+model TicketEscalationLog {
+  id            String         @id @default(cuid())
+  ticketId      String         @map("ticket_id")
+  fromTier      EscalationTier @map("from_tier")
+  toTier        EscalationTier @map("to_tier")
+  reason        String         @db.Text
+  escalatedById String?        @map("escalated_by_id")
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  ticket        SupportTicket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("ticket_escalation_logs")
+}
+
+model LiveChatSession {
+  id            String            @id @default(cuid())
+  sessionRef    String            @unique @map("session_ref")
+  userId        String?           @map("user_id")
+  customerName  String            @map("customer_name")
+  customerEmail String            @map("customer_email")
+  category      SupportCategory   @default(GENERAL)
+  status        ChatSessionStatus @default(ACTIVE)
+  agentId       String?           @map("agent_id")
+  messages      Json              @default("[]")
+  ticketId      String?           @map("ticket_id")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  @@index([sessionRef])
+  @@map("live_chat_sessions")
+}
+
+model VoiceCallbackRequest {
+  id            String          @id @default(cuid())
+  userId        String?         @map("user_id")
+  customerName  String          @map("customer_name")
+  phone         String
+  preferredTime String          @map("preferred_time")
+  category      SupportCategory @default(GENERAL)
+  status        CallbackStatus  @default(REQUESTED)
+  notes         String?         @db.Text
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("voice_callback_requests")
 }
 
 

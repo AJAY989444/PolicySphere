@@ -269,6 +269,10 @@ input, select, textarea {
 .modal-backdrop label,
 .modal-backdrop .form-label,
 .modal-content label,
+.crm-modal-box label,
+.crm-modal-overlay label,
+.crm-drawer-content label,
+.form-group label,
 .auth-container label,
 .auth-page label {
   color: #0f172a !important;
