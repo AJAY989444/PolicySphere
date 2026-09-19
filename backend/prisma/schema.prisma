@@ -45,6 +45,7 @@ model User {
   supportTicketsCreated  SupportTicket[]       @relation("CustomerTickets")
   supportTicketsAssigned SupportTicket[]       @relation("AssignedAgentTickets")
   ticketMessagesSent     TicketMessage[]
+  reportsGenerated       GeneratedReport[]
 
   @@map("users")
 }
@@ -844,5 +845,46 @@ model VoiceCallbackRequest {
   @@map("voice_callback_requests")
 }
 
+// ─── Module 19: Enterprise Reporting & Executive Analytics ─
 
+enum ReportType {
+  CUSTOMER_PORTFOLIO
+  TAX_80D_CERTIFICATE
+  ADVISOR_PERFORMANCE
+  SALES_GWP
+  RENEWAL_RADAR
+  CLAIMS_RATIO_TAT
+  FRAUD_AUDIT
+  COMMISSION_STATEMENT
+  REVENUE_FINANCIAL
+  TAX_COMPLIANCE
+  OPERATIONAL_SLA
+  EXECUTIVE_OVERVIEW
+}
 
+enum ReportFormat {
+  CSV
+  JSON
+  PDF
+}
+
+model GeneratedReport {
+  id          String       @id @default(cuid())
+  reportType  ReportType   @map("report_type")
+  title       String
+  dateRange   String       @map("date_range")
+  generatedBy String       @map("generated_by")
+  format      ReportFormat @default(CSV)
+  filters     Json         @default("{}")
+  summaryData Json         @default("{}") @map("summary_data")
+  recordCount Int          @default(0) @map("record_count")
+  fileSizeKb  Float        @default(0.0) @map("file_size_kb")
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  user        User         @relation(fields: [generatedBy], references: [id], onDelete: Cascade)
+
+  @@index([reportType])
+  @@index([generatedBy])
+  @@index([createdAt])
+  @@map("generated_reports")
+}

@@ -34,3 +34,6 @@ backend/uploads/*
 
 # Coverage
 coverage/
+
+# Scratch & Temporary
+scratch/

@@ -137,6 +137,15 @@ function Navbar({ onOpenSearch }) {
                   Notifications
                 </NavLink>
               </li>
+              <li>
+                <NavLink
+                  to="/reports"
+                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <span>📊</span> Reports & Tax
+                </NavLink>
+              </li>
               {(user.role === 'ADVISOR' || user.role === 'ADMIN') && (
                 <>
                   <li>

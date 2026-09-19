@@ -395,3 +395,43 @@
 - **Verification**:
   - 45/45 automated backend test assertions passed (100%) (`scratch/test-support-engine.js`).
   - Frontend production build verified (`npm run build`) with 0 errors.
+
+---
+
+## Point 19: Enterprise Insurance Reporting & Executive Analytics Hub (Module 19)
+**Status:** Complete  
+**Date:** 2026-09-17
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added PostgreSQL enums: `ReportType` (12 types), `ReportFormat` (`CSV`, `JSON`, `PDF`).
+  - Added `GeneratedReport` model for tracking export history, file sizes, date ranges, parameters, record counts, and user audit trails.
+  - Linked `User.reportsGenerated` relation and synchronized schema with Neon PostgreSQL (`npx prisma db push`).
+- **Backend Services, Controllers & Routes (`reporting.service.js`, `reporting.controller.js`, `reporting.routes.js`)**:
+  - **Executive Analytics Engine (SRS 19 & 32)**: Aggregates Gross Written Premium (GWP), active policies, Incurred Claim Ratio (ICR % with benchmark status), 13th-month IRDAI persistency %, CSAT rating, net platform revenue, and 6-month sales velocity trend.
+  - **10 Core Domain Reports**:
+    1. *Customer Report*: Portfolio sum assured, annual premium outlay, active coverage list, and claim payouts.
+    2. *Advisor Report*: Conversion rate %, sales velocity days, 5% TDS withholding (Section 194H), and advisor commission ledger.
+    3. *Sales & GWP*: Category distributions, ticket size tiers (Micro, Standard, Premium, HNW), and acquisition channel ROI (Smart Advisor AI, Catalog, Referral, Landing Page).
+    4. *Renewals & Radar*: 30/60/90-day renewal queues, grace period tracker (expired &lt;30 days), and persistency curve (13th, 25th, 37th month).
+    5. *Claims & TAT*: Incurred Claim Ratio (ICR), settlement turnaround time (days), settlement ratio %, and rejection reason breakdown.
+    6. *Fraud & Risk*: Average AI risk score, fast-track approval rate %, and detected anomaly red flags.
+    7. *Commissions*: Gross commissions accrued, 5% TDS deductions, net disbursed amounts, and advisor leaderboard.
+    8. *Revenue & Margins*: Net GWP after refunds, gateway fee margins (1.8%), and platform brokerage profit.
+    9. *Tax & GST*: 18% GST collection breakdown (CGST 9% + SGST 9% / IGST 18%), TDS Section 194H ledger, and Section 80D limits.
+    10. *Operations & SLA*: Underwriting auto-approval rate % and TAT, support SLA compliance %, and Net Promoter Score (NPS).
+  - **Official Form 80D Tax Exemption Certificate**: IRDAI-compliant tax certificate generation with itemized GST, insurer credentials, PAN/Aadhaar holder, and digital verification seal (`PS-CERT-...`).
+  - **Universal Export & Audit Engine**: Dynamic generation of Excel-compatible CSV and JSON data with persistent database audit logging in `GeneratedReport`.
+- **Frontend Hub (`ReportsPage.jsx`, `ReportsPage.css`)**:
+  - Interactive multi-period filter toolbar (Today, 7D, 30D, QTD, YTD, All Time).
+  - Executive KPI cards with dynamic status badges.
+  - 10 domain tabs with responsive charts, tables, progress indicators, and queue badges.
+  - Form 80D Certificate Modal with print stylesheet (`@media print`) and verification seal.
+  - One-click CSV and JSON export buttons.
+- **Routing & Navigation**:
+  - Routes: `/reports` (all users) and `/admin/reports` (staff).
+  - Added **"📊 Reports & Tax"** link in `Navbar.jsx`.
+- **Verification**:
+  - 54/54 automated backend test assertions passed (100%) (`scratch/test-reporting-engine.js`).
+  - Production build verified (`npm run build`) with 0 errors in 374ms.
+

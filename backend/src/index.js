@@ -56,6 +56,7 @@ const underwritingRoutes = require('./routes/underwriting.routes');
 const paymentGatewayRoutes = require('./routes/paymentGateway.routes');
 const searchRoutes = require('./routes/search.routes');
 const supportRoutes = require('./routes/support.routes');
+const reportingRoutes = require('./routes/reporting.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -74,6 +75,7 @@ app.use('/api/underwriting', underwritingRoutes);
 app.use('/api/payments-engine', paymentGatewayRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/reports', reportingRoutes);
 
 
 
