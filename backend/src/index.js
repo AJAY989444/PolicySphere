@@ -57,6 +57,7 @@ const paymentGatewayRoutes = require('./routes/paymentGateway.routes');
 const searchRoutes = require('./routes/search.routes');
 const supportRoutes = require('./routes/support.routes');
 const reportingRoutes = require('./routes/reporting.routes');
+const governanceRoutes = require('./routes/governance.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -64,6 +65,8 @@ app.use('/api/policies', policyRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/advisor', advisorRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/governance', governanceRoutes);
+app.use('/api/governance', governanceRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/notifications', notificationRoutes);

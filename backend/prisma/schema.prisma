@@ -46,6 +46,7 @@ model User {
   supportTicketsAssigned SupportTicket[]       @relation("AssignedAgentTickets")
   ticketMessagesSent     TicketMessage[]
   reportsGenerated       GeneratedReport[]
+  auditLogs              AuditLog[]
 
   @@map("users")
 }
@@ -888,3 +889,118 @@ model GeneratedReport {
   @@index([createdAt])
   @@map("generated_reports")
 }
+
+// ─── Module 20: Enterprise Super Admin Control Center, RBAC & Platform Governance ─
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT
+}
+
+enum AuditAction {
+  USER_ROLE_UPDATED
+  USER_STATUS_TOGGLED
+  POLICY_CREATED
+  POLICY_UPDATED
+  POLICY_STATUS_TOGGLED
+  COUPON_CREATED
+  COUPON_UPDATED
+  COUPON_STATUS_TOGGLED
+  SETTING_UPDATED
+  ANNOUNCEMENT_CREATED
+  ANNOUNCEMENT_STATUS_TOGGLED
+  INSURER_CREATED
+  INSURER_UPDATED
+  INSURER_STATUS_TOGGLED
+  SYSTEM_SEED
+}
+
+model AuditLog {
+  id            String       @id @default(cuid())
+  userId        String?      @map("user_id")
+  action        AuditAction
+  entityType    String       @map("entity_type")
+  entityId      String?      @map("entity_id")
+  ipAddress     String?      @map("ip_address")
+  userAgent     String?      @map("user_agent")
+  previousValue Json?        @map("previous_value")
+  newValue      Json?        @map("new_value")
+  status        String       @default("SUCCESS")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([entityType])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Coupon {
+  id            String            @id @default(cuid())
+  code          String            @unique
+  description   String?
+  discountType  DiscountType      @default(PERCENTAGE) @map("discount_type")
+  discountValue Float             @map("discount_value")
+  minPremium    Float             @default(0) @map("min_premium")
+  maxDiscount   Float?            @map("max_discount")
+  category      InsuranceCategory?
+  startDate     DateTime          @map("start_date")
+  endDate       DateTime          @map("end_date")
+  usageLimit    Int?              @map("usage_limit")
+  usedCount     Int               @default(0) @map("used_count")
+  isActive      Boolean           @default(true) @map("is_active")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@index([isActive])
+  @@map("coupons")
+}
+
+model InsurerPartner {
+  id             String            @id @default(cuid())
+  name           String            @unique
+  irdaRegNo      String            @unique @map("irda_reg_no")
+  category       InsuranceCategory
+  commissionRate Float             @default(0.125) @map("commission_rate")
+  contactEmail   String            @map("contact_email")
+  contactPhone   String?           @map("contact_phone")
+  isActive       Boolean           @default(true) @map("is_active")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@map("insurer_partners")
+}
+
+model PlatformAnnouncement {
+  id        String    @id @default(cuid())
+  title     String
+  message   String
+  severity  String    @default("INFO") // "INFO", "WARNING", "CRITICAL", "FESTIVE"
+  linkUrl   String?   @map("link_url")
+  isActive  Boolean   @default(true) @map("is_active")
+  startDate DateTime  @default(now()) @map("start_date")
+  endDate   DateTime? @map("end_date")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([isActive])
+  @@map("platform_announcements")
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  category    String   @default("GENERAL") // "FINANCIAL", "UNDERWRITING", "SECURITY", "SYSTEM"
+  description String?
+  updatedBy   String?  @map("updated_by")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@index([category])
+  @@map("system_settings")
+}
+

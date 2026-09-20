@@ -271,6 +271,9 @@
 - **Point 15 (Module 15)**: AI Engine (Recommendation, Premium Prediction, Claim Probability, Fraud Detection, Chatbot, Voice Assistant, Policy Explanation, Risk Scoring) ✅
 - **Point 16 (Module 16)**: Search Engine (Full-Text, Auto-Complete <30ms, Typo Tolerance, Insurance Synonyms, Voice Search, Semantic Search, Analytics <500ms) ✅
 - **Point 17 (Module 17)**: Enterprise Insurance Sales CRM (Multi-Channel Leads, Dynamic Scoring, Workload Auto-Assignment, 360° Drawer, Dialer, Meetings, Email Tracking, Conversion Funnel, Leaderboard) ✅
+- **Point 18 (Module 18)**: Omnichannel Support Center & SLA Engine (Knowledge Base, Tickets, SphereSupport AI, Escalation Tiers, CSAT) ✅
+- **Point 19 (Module 19)**: Enterprise Insurance Reporting & Executive Analytics Hub (10 Domain Reports, Form 80D Tax Certificates, CSV/JSON Exports) ✅
+- **Point 20 (Module 20)**: Enterprise Super Admin Control Center, RBAC & Platform Governance Hub (User RBAC, Insurer Registry, Promotions Engine, CMS Announcements, Forensic Audit Trail, System Controls) ✅
 
 ---
 
@@ -434,4 +437,47 @@
 - **Verification**:
   - 54/54 automated backend test assertions passed (100%) (`scratch/test-reporting-engine.js`).
   - Production build verified (`npm run build`) with 0 errors in 374ms.
+
+---
+
+## Point 20: Enterprise Super Admin Control Center, RBAC & Platform Governance Hub (Module 20)
+**Status:** Complete  
+**Date:** 2026-09-20
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added PostgreSQL enums:
+    - `DiscountType`: `PERCENTAGE`, `FLAT`.
+    - `AuditAction`: `USER_ROLE_UPDATED`, `USER_STATUS_TOGGLED`, `COUPON_CREATED`, `COUPON_STATUS_TOGGLED`, `INSURER_CREATED`, `INSURER_STATUS_TOGGLED`, `ANNOUNCEMENT_CREATED`, `ANNOUNCEMENT_TOGGLED`, `ANNOUNCEMENT_DELETED`, `SETTING_UPDATED`, `SYSTEM_SEED`.
+  - Added 5 dedicated models:
+    - `AuditLog`: Immutable forensic audit logging tracking `userId`, `action`, `entityType`, `entityId`, `details`, `ipAddress`, `userAgent`, `previousValue`, `newValue`.
+    - `Coupon`: Complete promotional voucher management storing `code`, `discountType`, `discountValue`, `minPremium`, `maxDiscountCap`, `validFrom`, `validUntil`, `maxUses`, `timesUsed`, `applicableCategory`, and `isActive`.
+    - `InsurerPartner`: Insurer partner registry storing `name`, `irdaRegNo`, `category`, `commissionRate`, `contactEmail`, `supportPhone`, `rating`, `logoUrl`, and `isActive`.
+    - `PlatformAnnouncement`: Global broadcast notifications tracking `title`, `message`, `severity` (`INFO`, `WARNING`, `CRITICAL`, `FESTIVE`), `isActive`, `linkUrl`, `startDate`, `endDate`, and `createdBy`.
+    - `SystemSetting`: Platform operational parameters with `key`, `value`, `category`, and `description`.
+  - Linked `User.auditLogs` relation and synchronized schema with Neon PostgreSQL (`npx prisma db push`).
+- **Backend Services, Controllers & Routes (`governance.service.js`, `governance.controller.js`, `governance.routes.js`)**:
+  - **User Identity & RBAC Management (SRS 20 & 21)**: Full user directory with pagination, search, role filters, role promotion/demotion (`CUSTOMER`, `ADVISOR`, `ADMIN`), and account suspension/reactivation. Built-in security guards prevent active admin self-demotion or self-suspension, and revoke all active refresh tokens upon account suspension.
+  - **Policies & Partner Insurers (SRS 20)**: Comprehensive policy catalog management and Insurer Partner Registry with IRDAI license tracking, commission rate management, and auto-seeding of top 5 Indian insurers (Star Health, HDFC ERGO, Max Bupa, ICICI Lombard, New India Assurance).
+  - **Promotions & Coupon Engine (SRS 20)**: Full promotional coupon lifecycle and real-time checkout validation engine supporting percentage or flat discounts, date windows, minimum policy premium constraints, and maximum discount caps.
+  - **CMS & Platform Announcements Broadcaster (SRS 20)**: Global platform announcements with multi-severity support (`INFO`, `WARNING`, `CRITICAL`, `FESTIVE`), scheduling date ranges, and public fetch endpoint.
+  - **Forensic Security Audit Trail Engine (SRS 36)**: Granular tamper-resistant logging capturing actor ID, action enum, IP address, user-agent, and before/after JSON diff snapshots for administrative actions.
+  - **Platform Parameters & Operational Controls (SRS 20)**: Real-time configuration of key platform variables (`BROKERAGE_COMMISSION_RATE`, `PAYMENT_GATEWAY_FEE_RATE`, `AUTO_UNDERWRITING_THRESHOLD`, `MAINTENANCE_MODE`, etc.).
+- **Frontend Super Admin Control Center (`AdminDashboardPage.jsx`, `AdminDashboardPage.css`, `AnnouncementBanner.jsx`, `AnnouncementBanner.css`)**:
+  - **Global Dismissible Announcement Banner**: Mounted at the root of `AppLayout.jsx` with severity themes, CTA links, and session-based dismiss controls.
+  - **6-Tab Unified Control Center**:
+    1. *User Directory & RBAC*: Searchable user roster with role badges, promotion/demotion modal, and account suspension/reactivation toggles.
+    2. *Policies & Insurers*: Dual sub-views for Policy Catalog management and Insurer Partner Registry with IRDAI license registration modal.
+    3. *Coupons & Discounts*: Interactive coupon cards, live activation toggles, coupon creator modal, and built-in interactive **Discount Calculator & Coupon Tester**.
+    4. *CMS & Announcements*: Broadcast manager with live preview, severity tags, and schedule controls.
+    5. *Security Audit Trail*: Forensic audit log table with filter dropdowns, actor metadata, and **View JSON Diff Snapshot** modal.
+    6. *Platform Parameters*: Live configuration cockpit for brokerage rates, gateway margins, underwriting thresholds, and maintenance mode toggle.
+- **Routing & Navigation**:
+  - Super Admin Dashboard at `/admin` (strictly guarded for `ADMIN` role).
+  - Public endpoints at `/api/governance/public/announcements/active` and `/api/governance/public/coupons/validate`.
+  - Administrative governance API at `/api/admin/governance/*`.
+- **Verification**:
+  - 48/48 automated backend test assertions passed (100%) (`scratch/test-governance-engine.js`).
+  - Frontend production build verified (`npm run build`) with 0 errors.
+
 

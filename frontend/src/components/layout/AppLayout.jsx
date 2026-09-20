@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import AnnouncementBanner from '../common/AnnouncementBanner';
 import SphereAIAssistant from '../common/SphereAIAssistant';
 import GlobalSearchModal from '../search/GlobalSearchModal';
 import './AppLayout.css';
@@ -22,6 +23,7 @@ function AppLayout() {
 
   return (
     <div className="app-layout">
+      <AnnouncementBanner />
       <Navbar onOpenSearch={() => setIsSearchOpen(true)} />
       <main className="app-main">
         <Outlet />
