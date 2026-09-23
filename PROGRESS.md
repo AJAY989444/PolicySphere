@@ -274,6 +274,7 @@
 - **Point 18 (Module 18)**: Omnichannel Support Center & SLA Engine (Knowledge Base, Tickets, SphereSupport AI, Escalation Tiers, CSAT) ✅
 - **Point 19 (Module 19)**: Enterprise Insurance Reporting & Executive Analytics Hub (10 Domain Reports, Form 80D Tax Certificates, CSV/JSON Exports) ✅
 - **Point 20 (Module 20)**: Enterprise Super Admin Control Center, RBAC & Platform Governance Hub (User RBAC, Insurer Registry, Promotions Engine, CMS Announcements, Forensic Audit Trail, System Controls) ✅
+- **Point 21 (Module 21)**: Corporate Customer & Group Insurance Portal (B2B Employee Health & Benefits Hub, GMC/GPA/GTL Policies, Bulk CSV Roster Ingestion, Digital Cashless e-Cards, ICR Claims Radar, PEPM Invoicing) ✅
 
 ---
 
@@ -479,5 +480,105 @@
 - **Verification**:
   - 48/48 automated backend test assertions passed (100%) (`scratch/test-governance-engine.js`).
   - Frontend production build verified (`npm run build`) with 0 errors.
+
+---
+
+## Point 21: Corporate Customer & Group Insurance Portal (Module 21)
+**Status:** Complete  
+**Date:** 2026-09-20
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added PostgreSQL enums:
+    - `GroupPolicyType`: `GMC` (Group Medical Cover), `GPA` (Group Personal Accident), `GTL` (Group Term Life), `COVID_SPECIAL`.
+    - `CorporateTier`: `EXECUTIVE` (₹10L sum insured), `SENIOR` (₹5L sum insured), `STANDARD` (₹3L sum insured).
+    - `EnrollmentStatus`: `ACTIVE`, `PENDING_ENROLLMENT`, `OPTED_OUT`, `TERMINATED`.
+    - `CorporateClaimStatus`: `SUBMITTED`, `IN_REVIEW`, `APPROVED`, `SETTLED`, `REJECTED`.
+    - `InvoiceStatus`: `PAID`, `PENDING`, `OVERDUE`.
+  - Added 6 dedicated models:
+    - `CorporateAccount`: Company profile tracking name, domain, CIN, GSTIN, industry, employee count, HR contact metadata, wallet balance, and active status.
+    - `GroupPolicy`: Master corporate policy contracts storing policy number, type (`GMC`/`GPA`/`GTL`), insurer name, sum insured per life, monthly PEPM, annual premium, waiting period waivers, and cashless hospital network count.
+    - `CorporateEmployee`: Complete census record storing employee code, full name, work email, department, designation, tier, coverage amount, enrollment status, eCard number, and join date.
+    - `CorporateDependent`: Dependent coverage records linked to employees tracking relation (`SPOUSE`, `CHILD`, `PARENT`), gender, and active flag.
+    - `CorporateClaim`: Real-time corporate hospitalization tracker storing claim reference (`CORP-CLM-...`), patient name, relationship, hospital name, city, ailment, claimed amount, approved amount, and cashless pre-auth status.
+    - `CorporateInvoice`: Per-employee-per-month (PEPM) invoicing records tracking billing period, active headcount, base premium, 18% GST itemization, total payable, and payment status.
+  - Linked relations to `User` and synchronized schema with Neon PostgreSQL (`npx prisma db push`).
+- **Backend Services, Controllers & Routes (`corporate.service.js`, `corporate.controller.js`, `corporate.routes.js`)**:
+  - **Demo Seeder & Multi-Tenant Organization Support**: Auto-seeds demo organization (*Acme Technologies India Pvt Ltd*) with 3 active master policies (GMC Health ₹5L, GPA Accident ₹10L, GTL Life ₹25L), 15 sample employees across 7 departments, enrolled dependents, sample claims, and paid invoices.
+  - **Executive Overview & ICR Engine (SRS 4 & 32)**: Aggregates total enrolled lives (employees + dependents), active contracts, monthly/annual premium outlay, Incurred Claim Ratio (ICR % with `OPTIMAL`, `LOSS_WARNING`, `HIGH_UNDERWRITING_PROFIT` benchmark status), and workforce department distributions.
+  - **Census Management & Tier Rules**: Full employee directory with search, department filtering, tier assignment (Executive ₹10L, Senior ₹5L, Standard ₹3L), and status toggling (`ACTIVE` vs `OPTED_OUT`).
+  - **Bulk CSV Ingestion Engine**: Accepts parsed CSV datasets, validates mandatory fields, deduplicates existing employee codes/emails, automatically assigns coverage amounts based on tier, and generates unique eCard numbers (`PS-ECARD-...`).
+  - **Dependent Management Engine**: Add and manage eligible spouses, children, and parents with relation validation.
+  - **Digital Cashless e-Card Engine**: Generates complete e-Health card payloads with QR verification tokens (`PS-VAL:...`), TPA 24x7 cashless desk contact, network hospital locator, and policy summary.
+  - **Corporate Claims & Hospitalization Radar**: Handles cashless pre-authorization and reimbursement claim filing, status updates (`APPROVED`, `SETTLED`, `REJECTED`), and payout tracking.
+  - **Monthly PEPM Invoicing Engine**: Dynamically calculates active headcount $\times$ total PEPM + 18% GST (CGST 9% + SGST 9%) and issues formal tax receipts.
+  - **Employee Self-Service (`/my-benefits`)**: Endpoint for authenticated employees to view their company-provided group coverage and dependents.
+- **Frontend Corporate Benefits Hub (`CorporatePortalPage.jsx`, `CorporatePortalPage.css`, `BulkUploadModal.jsx`, `BulkUploadModal.css`)**:
+  - Corporate Header with company credentials (CIN, GSTIN), action buttons (**+ Enroll Employee**, **📥 Bulk CSV Ingestion**, **🔄 Refresh**).
+  - Executive KPI cards: Total Enrolled Lives, Active Group Policies, Monthly Premium Outlay, Incurred Claim Ratio (ICR %), and Annual Covered Sum.
+  - 6 Domain Tabs:
+    1. *Overview & Utilization*: Department distribution progress bars, sum insured tier cards, and active master policy cards.
+    2. *Employee Census & Roster*: Search bar, department and tier filters, full roster data table, dependent count buttons, and status toggles.
+    3. *Group Policies & Tiers*: Master contract cards with insurer details, cashless hospital count, and Day-1 pre-existing/maternity coverage badges.
+    4. *Digital Cashless e-Cards*: Interactive e-Card selector grid and printable card modal with QR security pattern and TPA helpline.
+    5. *Corporate Claims Radar*: Hospitalization admissions table with diagnosis, claim amount, approved amount, and status pill.
+    6. *PEPM Billing & Invoices*: Monthly PEPM billing history with 18% GST itemization and download receipt triggers.
+  - Modals: Enroll Employee Modal, Manage Dependents Modal, Submit Hospitalization Claim Modal, Establish Master Policy Modal, and Bulk CSV Ingestion Modal.
+- **Routing & Navigation**:
+  - Routes registered at `/corporate` (all authenticated users) and `/admin/corporate` (staff/admin).
+  - Added **"🏢 Corporate"** link in `Navbar.jsx`.
+- **Verification**:
+  - 48/48 automated backend test assertions passed (100%) (`scratch/test-corporate-engine.js`).
+  - Frontend production build verified (`npm run build`) with 0 errors in 4.70s.
+
+---
+
+## Point 22: Insurance Company & Partner Insurer Ecosystem (Module 22)
+**Status:** Complete  
+**Date:** 2026-09-21
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added PostgreSQL enums:
+    - `UnderwritingDecisionType`: `STANDARD_APPROVAL`, `COUNTER_OFFER_LOADING`, `EXCLUSION_IMPOSED`, `DECLINED`.
+    - `AdjudicationStatus`: `PREAUTH_APPROVED`, `SETTLED`, `ADDITIONAL_DOCS_REQUESTED`, `REPUDIATED`.
+    - `SettlementStatus`: `PENDING`, `DISBURSED`, `RECONCILED`.
+  - Added / enhanced 6 models:
+    - `InsurerPartner`: Augmented with `solvencyRatio` (2.15x), `headquarters`, `claimSettlementRatio` (98.2%), `networkHospitals` (14,200), `apiKey`, and `webhookUrl`.
+    - `InsurerProductRule`: Actuarial guidelines tracking entry age bounds (18–65), pre-existing waiting periods (12–36m), room rent limit %, copay %, deductible amount, restoration benefits, and AYUSH cover.
+    - `InsurerUnderwritingQueue`: Scrutiny queue tracking referred proposals, applicant age, sum insured, quoted premium, medical disclosures, AI risk score, counter-offer loadings (+15%), exclusion riders, final premium, and reviewer timestamps.
+    - `InsurerClaimAdjudication`: TPA claims adjudication tracking hospital network tier, claimed amount, initial pre-auth GOP sanction, net approved amount, itemized copay & non-medical deductions, and surveyor notes.
+    - `InsurerSettlementBatch`: Monthly remittance ledger itemizing gross premium, 15% platform brokerage deductions, 5% Section 194H TDS withholding, and net disbursed payout.
+    - `InsurerApiCredential`: Machine-to-machine API key management, webhook endpoints, and rate limit quotas (1,200 RPM).
+  - Pushed schema to Neon PostgreSQL (`npx prisma db push --accept-data-loss`) and regenerated Prisma Client v5.22.0.
+- **Backend Services, Controllers & Routes (`insurer.service.js`, `insurer.controller.js`, `insurer.routes.js`)**:
+  - **Demo Seeder & Multi-Insurer Hub**: Seeds top 5 Indian insurers (Star Health, HDFC ERGO, ICICI Lombard, Niva Bupa, Care Health) with license numbers, solvency ratios, and API keys.
+  - **Executive Insurer Cockpit (SRS 4 & 19)**: Aggregates Gross Written Premium (GWP), active policies underwritten, claims liability, Incurred Claim Ratio (ICR % with optimal rating), and average turnaround time (TAT in days).
+  - **Actuarial Guidelines & Product Config (SRS 4 & 3)**: Product underwriting rule management for waiting periods, room-rent sub-limits, and copay %.
+  - **Underwriting Scrutiny & Counter-Offer Engine (SRS 4, 10 & 22)**: Review referred proposals, apply risk loadings (+20%), add specific disease exclusions, or decline applications.
+  - **TPA & Cashless Claims Adjudication Desk (SRS 4, 11 & 22)**: Hospitalization admissions scrutiny, cashless pre-auth GOP sanctions, and itemized deduction final settlements.
+  - **Financial Settlement & Remittance Reconciliation (SRS 4 & 19)**: Monthly gross GWP collection $\rightarrow$ Platform brokerage deduction (15%) $\rightarrow$ TDS Section 194H (5%) $\rightarrow$ Net remitted.
+  - **Open Insurance API Gateway & Webhook Simulator (SRS 22, 23 & 34)**:
+    - `POST /api/insurer/v1/policy/bind`: Machine-to-machine instant policy binding.
+    - `POST /api/insurer/v1/claims/preauth`: Hospital cashless pre-auth authorization.
+    - `POST /api/insurer/v1/webhook/simulate`: Webhook simulator dispatching live callbacks with HMAC SHA-256 signatures.
+- **Frontend Insurer Partner Hub (`InsurerPortalPage.jsx`, `InsurerPortalPage.css`)**:
+  - Top Insurer Partner Switcher (Star Health, HDFC ERGO, ICICI Lombard, Niva Bupa, Care Health) with real-time solvency ratio chips, CSR %, and network hospital counts.
+  - 5 Executive KPI cards: Gross Written Premium (GWP), Bound Policies, Active Claims Liability, Incurred Claim Ratio (ICR %), and Solvency Headroom.
+  - 6 Domain Tabs:
+    1. *Overview & Actuarial Health*: Solvency margin progress bar, loss ratio gauge, and financial summary.
+    2. *Products & Actuarial Rules*: Insurer catalog with room-rent limits, copay %, waiting periods, and **Edit Actuarial Guidelines Modal**.
+    3. *Underwriting & Counter-Offers*: Referred proposals queue with medical disclosures, lifestyle risk flags, and **Review & Underwrite Modal**.
+    4. *TPA & Cashless Claims Desk*: Hospitalization admissions table with pre-auth amounts, approved amounts, and **Adjudicate Claim Modal**.
+    5. *Remittance & Settlements*: Monthly remittance batches, platform brokerage deduction (15%), 5% TDS, and **Generate Settlement Batch Modal**.
+    6. *Open Insurance API Gateway*: API Key manager, interactive API endpoint tester, and live **Webhook Simulator**.
+- **Routing & Navigation**:
+  - Routes: `/insurer` (all authenticated users) and `/admin/insurer` (staff/admin).
+  - Navigation: Added **"🏛️ Insurers"** link in `Navbar.jsx`.
+- **Verification**:
+  - 51/51 automated backend test assertions passed (100%) (`scratch/test-insurer-engine.js`).
+  - Frontend production build verified (`npm run build`) with 0 errors in 4.79s.
+
+
 
 

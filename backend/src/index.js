@@ -58,6 +58,8 @@ const searchRoutes = require('./routes/search.routes');
 const supportRoutes = require('./routes/support.routes');
 const reportingRoutes = require('./routes/reporting.routes');
 const governanceRoutes = require('./routes/governance.routes');
+const corporateRoutes = require('./routes/corporate.routes');
+const insurerRoutes = require('./routes/insurer.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -67,6 +69,8 @@ app.use('/api/advisor', advisorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/governance', governanceRoutes);
 app.use('/api/governance', governanceRoutes);
+app.use('/api/corporate', corporateRoutes);
+app.use('/api/insurer', insurerRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/notifications', notificationRoutes);
@@ -87,9 +91,21 @@ app.use(errorHandler);
 
 // ─── Start Server ──────────────────────────────────────────
 const PORT = config.port;
+const prisma = require('./config/db');
+
 app.listen(PORT, () => {
   console.log(`\n🚀 PolicySphere API running on http://localhost:${PORT}`);
   console.log(`   Environment: ${config.nodeEnv}\n`);
+
+  // Warm up Neon connection
+  prisma.$connect()
+    .then(() => console.log('✅ Connected to Neon PostgreSQL database'))
+    .catch((err) => console.warn('⚠️ Initial database connect delayed:', err.message));
+
+  // Keep Neon serverless database active (prevent auto-suspension during active dev)
+  setInterval(() => {
+    prisma.$queryRaw`SELECT 1`.catch(() => {});
+  }, 4 * 60 * 1000);
 });
 
 module.exports = app;

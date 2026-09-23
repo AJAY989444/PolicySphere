@@ -28,6 +28,8 @@ import SearchResultsPage from './pages/SearchResultsPage';
 import CustomerSupportPage from './pages/CustomerSupportPage';
 import SupportDeskPage from './pages/SupportDeskPage';
 import ReportsPage from './pages/ReportsPage';
+import CorporatePortalPage from './pages/CorporatePortalPage';
+import InsurerPortalPage from './pages/InsurerPortalPage';
 
 function App() {
   return (
@@ -57,6 +59,8 @@ function App() {
           <Route path="proposals/wizard/:proposalId" element={<ProposalWizardPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="corporate" element={<CorporatePortalPage />} />
+          <Route path="insurer" element={<InsurerPortalPage />} />
           <Route path="advisor" element={<AdvisorDashboardPage />} />
         </Route>
 
@@ -67,6 +71,8 @@ function App() {
           <Route path="admin/support" element={<SupportDeskPage />} />
           <Route path="admin/analytics" element={<AnalyticsPage />} />
           <Route path="admin/reports" element={<ReportsPage />} />
+          <Route path="admin/corporate" element={<CorporatePortalPage />} />
+          <Route path="admin/insurer" element={<InsurerPortalPage />} />
           <Route path="admin/reconciliation" element={<PaymentReconciliationPage />} />
           <Route path="admin" element={<AdminDashboardPage />} />
           <Route path="admin/policies/new" element={<ManagePolicyPage />} />

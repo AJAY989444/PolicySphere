@@ -47,6 +47,8 @@ model User {
   ticketMessagesSent     TicketMessage[]
   reportsGenerated       GeneratedReport[]
   auditLogs              AuditLog[]
+  corporateAccounts      CorporateAccount[]
+  corporateEmployees     CorporateEmployee[]
 
   @@map("users")
 }
@@ -960,16 +962,28 @@ model Coupon {
 }
 
 model InsurerPartner {
-  id             String            @id @default(cuid())
-  name           String            @unique
-  irdaRegNo      String            @unique @map("irda_reg_no")
-  category       InsuranceCategory
-  commissionRate Float             @default(0.125) @map("commission_rate")
-  contactEmail   String            @map("contact_email")
-  contactPhone   String?           @map("contact_phone")
-  isActive       Boolean           @default(true) @map("is_active")
-  createdAt      DateTime          @default(now()) @map("created_at")
-  updatedAt      DateTime          @updatedAt @map("updated_at")
+  id                   String            @id @default(cuid())
+  name                 String            @unique
+  irdaRegNo            String            @unique @map("irda_reg_no")
+  category             InsuranceCategory
+  commissionRate       Float             @default(0.125) @map("commission_rate")
+  contactEmail         String            @map("contact_email")
+  contactPhone         String?           @map("contact_phone")
+  solvencyRatio        Float             @default(2.15) @map("solvency_ratio")
+  headquarters         String            @default("Mumbai, Maharashtra")
+  claimSettlementRatio Float             @default(98.2) @map("claim_settlement_ratio")
+  networkHospitals     Int               @default(14200) @map("network_hospitals")
+  apiKey               String?           @unique @map("api_key")
+  webhookUrl           String?           @map("webhook_url")
+  isActive             Boolean           @default(true) @map("is_active")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  productRules         InsurerProductRule[]
+  underwritingQueue    InsurerUnderwritingQueue[]
+  claimsAdjudicated    InsurerClaimAdjudication[]
+  settlementBatches    InsurerSettlementBatch[]
+  apiCredentials       InsurerApiCredential[]
 
   @@index([isActive])
   @@map("insurer_partners")
@@ -1003,4 +1017,348 @@ model SystemSetting {
   @@index([category])
   @@map("system_settings")
 }
+
+// ─── Module 21: Corporate Customer & Group Insurance Portal ────────
+
+enum GroupPolicyType {
+  GMC           // Group Medical Cover
+  GPA           // Group Personal Accident
+  GTL           // Group Term Life
+  COVID_SPECIAL
+}
+
+enum CorporateTier {
+  EXECUTIVE     // ₹10,00,000 Sum Insured
+  SENIOR        // ₹5,00,000 Sum Insured
+  STANDARD      // ₹3,00,000 Sum Insured
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  PENDING_ENROLLMENT
+  OPTED_OUT
+  TERMINATED
+}
+
+enum CorporateClaimStatus {
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  SETTLED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+model CorporateAccount {
+  id              String            @id @default(cuid())
+  companyName     String            @map("company_name")
+  companyDomain   String?           @map("company_domain")
+  cinNumber       String?           @unique @map("cin_number")
+  gstinNumber     String?           @map("gstin_number")
+  industry        String            @default("Technology")
+  employeeCount   Int               @default(0) @map("employee_count")
+  hrContactName   String            @map("hr_contact_name")
+  hrContactEmail  String            @map("hr_contact_email")
+  hrContactPhone  String?           @map("hr_contact_phone")
+  walletBalance   Float             @default(50000.0) @map("wallet_balance")
+  isActive        Boolean           @default(true) @map("is_active")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  hrUserId        String?           @map("hr_user_id")
+  hrUser          User?             @relation(fields: [hrUserId], references: [id], onDelete: SetNull)
+
+  groupPolicies   GroupPolicy[]
+  employees       CorporateEmployee[]
+  claims          CorporateClaim[]
+  invoices        CorporateInvoice[]
+
+  @@index([hrContactEmail])
+  @@index([isActive])
+  @@map("corporate_accounts")
+}
+
+model GroupPolicy {
+  id                  String          @id @default(cuid())
+  corporateAccountId  String          @map("corporate_account_id")
+  policyNumber        String          @unique @map("policy_number")
+  policyType          GroupPolicyType @default(GMC) @map("policy_type")
+  title               String
+  insurerName         String          @map("insurer_name")
+  totalSumInsured     Float           @map("total_sum_insured")
+  premiumPerEmployee  Float           @map("premium_per_employee") // Monthly PEPM
+  annualPremium       Float           @map("annual_premium")
+  waitingPeriodWaived Boolean         @default(true) @map("waiting_period_waived")
+  maternityCovered    Boolean         @default(true) @map("maternity_covered")
+  preExistingCovered  Boolean         @default(true) @map("pre_existing_covered")
+  cashlessHospitals   Int             @default(8500) @map("cashless_hospitals")
+  startDate           DateTime        @default(now()) @map("start_date")
+  endDate             DateTime        @map("end_date")
+  isActive            Boolean         @default(true) @map("is_active")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  corporateAccount    CorporateAccount @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  claims              CorporateClaim[]
+
+  @@index([corporateAccountId])
+  @@index([policyType])
+  @@index([isActive])
+  @@map("group_policies")
+}
+
+model CorporateEmployee {
+  id                  String             @id @default(cuid())
+  corporateAccountId  String             @map("corporate_account_id")
+  userId              String?            @map("user_id")
+  employeeCode        String             @map("employee_code")
+  fullName            String             @map("full_name")
+  workEmail           String             @map("work_email")
+  phone               String?
+  department          String             @default("Engineering")
+  designation         String             @default("Software Engineer")
+  tier                CorporateTier      @default(STANDARD)
+  coverageAmount      Float              @default(500000.0) @map("coverage_amount")
+  enrollmentStatus    EnrollmentStatus   @default(ACTIVE) @map("enrollment_status")
+  ecardNumber         String             @unique @map("ecard_number")
+  joinDate            DateTime           @default(now()) @map("join_date")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+
+  corporateAccount    CorporateAccount   @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  user                User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  dependents          CorporateDependent[]
+  claims              CorporateClaim[]
+
+  @@unique([corporateAccountId, employeeCode])
+  @@unique([corporateAccountId, workEmail])
+  @@index([corporateAccountId])
+  @@index([workEmail])
+  @@index([enrollmentStatus])
+  @@map("corporate_employees")
+}
+
+model CorporateDependent {
+  id          String            @id @default(cuid())
+  employeeId  String            @map("employee_id")
+  fullName    String            @map("full_name")
+  relation    String            // "SPOUSE", "CHILD", "PARENT"
+  dateOfBirth DateTime?         @map("date_of_birth")
+  gender      String?           // "MALE", "FEMALE", "OTHER"
+  isActive    Boolean           @default(true) @map("is_active")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  employee    CorporateEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@map("corporate_dependents")
+}
+
+model CorporateClaim {
+  id                  String               @id @default(cuid())
+  corporateAccountId  String               @map("corporate_account_id")
+  employeeId          String               @map("employee_id")
+  groupPolicyId       String               @map("group_policy_id")
+  claimNumber         String               @unique @map("claim_number")
+  patientName         String               @map("patient_name")
+  relationship        String               @default("SELF") // "SELF", "SPOUSE", "CHILD", "PARENT"
+  hospitalName        String               @map("hospital_name")
+  city                String               @default("Mumbai")
+  ailment             String
+  admissionDate       DateTime             @map("admission_date")
+  dischargeDate       DateTime?            @map("discharge_date")
+  claimedAmount       Float                @map("claimed_amount")
+  approvedAmount      Float?               @map("approved_amount")
+  isCashless          Boolean              @default(true) @map("is_cashless")
+  status              CorporateClaimStatus @default(SUBMITTED)
+  remarks             String?
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+
+  corporateAccount    CorporateAccount     @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  employee            CorporateEmployee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  groupPolicy         GroupPolicy          @relation(fields: [groupPolicyId], references: [id], onDelete: Cascade)
+
+  @@index([corporateAccountId])
+  @@index([employeeId])
+  @@index([status])
+  @@map("corporate_claims")
+}
+
+model CorporateInvoice {
+  id                  String        @id @default(cuid())
+  corporateAccountId  String        @map("corporate_account_id")
+  invoiceNumber       String        @unique @map("invoice_number")
+  billingPeriod       String        @map("billing_period") // "2026-09"
+  activeEmployees     Int           @map("active_employees")
+  basePremium         Float         @map("base_premium")
+  gstAmount           Float         @map("gst_amount") // 18% GST
+  totalAmount         Float         @map("total_amount")
+  status              InvoiceStatus @default(PENDING)
+  dueDate             DateTime      @map("due_date")
+  paidAt              DateTime?     @map("paid_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  corporateAccount    CorporateAccount @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+
+  @@index([corporateAccountId])
+  @@index([status])
+  @@map("corporate_invoices")
+}
+
+// ─── Module 22: Insurance Company & Partner Insurer Ecosystem ─────
+
+enum UnderwritingDecisionType {
+  STANDARD_APPROVAL
+  COUNTER_OFFER_LOADING
+  EXCLUSION_IMPOSED
+  DECLINED
+}
+
+enum AdjudicationStatus {
+  PREAUTH_APPROVED
+  SETTLED
+  ADDITIONAL_DOCS_REQUESTED
+  REPUDIATED
+}
+
+enum SettlementStatus {
+  PENDING
+  DISBURSED
+  RECONCILED
+}
+
+model InsurerProductRule {
+  id                      String            @id @default(cuid())
+  insurerPartnerId        String            @map("insurer_partner_id")
+  policyId                String?           @map("policy_id")
+  category                InsuranceCategory @default(HEALTH)
+  productTitle            String            @map("product_title")
+  minEntryAge             Int               @default(18) @map("min_entry_age")
+  maxEntryAge             Int               @default(65) @map("max_entry_age")
+  waitingPeriodMonths     Int               @default(24) @map("waiting_period_months")
+  roomRentLimitPercent    Float             @default(1.0) @map("room_rent_limit_percent")
+  copayPercentage         Float             @default(10.0) @map("copay_percentage")
+  deductibleAmount        Float             @default(0.0) @map("deductible_amount")
+  maternityWaitingMonths  Int               @default(24) @map("maternity_waiting_months")
+  ayushCovered            Boolean           @default(true) @map("ayush_covered")
+  restorationBenefit      Boolean           @default(true) @map("restoration_benefit")
+  bariatricSurgeryCovered Boolean           @default(false) @map("bariatric_surgery_covered")
+  isActive                Boolean           @default(true) @map("is_active")
+  createdAt               DateTime          @default(now()) @map("created_at")
+  updatedAt               DateTime          @updatedAt @map("updated_at")
+
+  insurerPartner          InsurerPartner    @relation(fields: [insurerPartnerId], references: [id], onDelete: Cascade)
+
+  @@index([insurerPartnerId])
+  @@index([category])
+  @@map("insurer_product_rules")
+}
+
+model InsurerUnderwritingQueue {
+  id                 String                   @id @default(cuid())
+  insurerPartnerId   String                   @map("insurer_partner_id")
+  proposalRef        String                   @map("proposal_ref")
+  customerName       String                   @map("customer_name")
+  customerAge        Int                      @default(35) @map("customer_age")
+  productName        String                   @map("product_name")
+  sumInsured         Float                    @map("sum_insured")
+  quotedPremium      Float                    @map("quoted_premium")
+  medicalDisclosures Json                     @default("[]") @map("medical_disclosures")
+  aiRiskScore        Int                      @default(45) @map("ai_risk_score")
+  decision           UnderwritingDecisionType @default(STANDARD_APPROVAL)
+  loadingPercentage  Float                    @default(0.0) @map("loading_percentage")
+  exclusionList      Json                     @default("[]") @map("exclusion_list")
+  finalPremium       Float                    @map("final_premium")
+  underwriterRemarks String?                  @map("underwriter_remarks")
+  decisionDate       DateTime?                @map("decision_date")
+  reviewedBy         String?                  @map("reviewed_by")
+  createdAt          DateTime                 @default(now()) @map("created_at")
+  updatedAt          DateTime                 @updatedAt @map("updated_at")
+
+  insurerPartner     InsurerPartner           @relation(fields: [insurerPartnerId], references: [id], onDelete: Cascade)
+
+  @@index([insurerPartnerId])
+  @@index([decision])
+  @@map("insurer_underwriting_queues")
+}
+
+model InsurerClaimAdjudication {
+  id                  String             @id @default(cuid())
+  insurerPartnerId    String             @map("insurer_partner_id")
+  claimNumber         String             @map("claim_number")
+  patientName         String             @map("patient_name")
+  hospitalName        String             @map("hospital_name")
+  hospitalCity        String             @default("Mumbai") @map("hospital_city")
+  networkTier         String             @default("TIER_1_PREFERRED") @map("network_tier")
+  ailment             String
+  claimedAmount       Float              @map("claimed_amount")
+  preAuthAmount       Float?             @map("pre_auth_amount")
+  approvedAmount      Float?             @map("approved_amount")
+  copayDeduction      Float              @default(0.0) @map("copay_deduction")
+  nonMedicalDeduction Float              @default(0.0) @map("non_medical_deduction")
+  status              AdjudicationStatus @default(PREAUTH_APPROVED)
+  remarks             String?
+  surveyorReportNotes String?            @map("surveyor_report_notes")
+  adjudicatedBy       String?            @map("adjudicated_by")
+  adjudicatedAt       DateTime?          @map("adjudicated_at")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+
+  insurerPartner      InsurerPartner     @relation(fields: [insurerPartnerId], references: [id], onDelete: Cascade)
+
+  @@index([insurerPartnerId])
+  @@index([status])
+  @@map("insurer_claim_adjudications")
+}
+
+model InsurerSettlementBatch {
+  id                 String           @id @default(cuid())
+  insurerPartnerId   String           @map("insurer_partner_id")
+  batchNumber        String           @unique @map("batch_number")
+  billingPeriod      String           @map("billing_period") // "2026-09"
+  policiesBound      Int              @default(0) @map("policies_bound")
+  grossPremium       Float            @map("gross_premium")
+  platformBrokerage  Float            @map("platform_brokerage") // 15%
+  tdsDeduction       Float            @default(0.0) @map("tds_deduction") // 5% TDS
+  netPayoutAmount    Float            @map("net_payout_amount")
+  status             SettlementStatus @default(PENDING)
+  disbursedAt        DateTime?        @map("disbursed_at")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  insurerPartner     InsurerPartner   @relation(fields: [insurerPartnerId], references: [id], onDelete: Cascade)
+
+  @@index([insurerPartnerId])
+  @@index([status])
+  @@map("insurer_settlement_batches")
+}
+
+model InsurerApiCredential {
+  id                 String         @id @default(cuid())
+  insurerPartnerId   String         @map("insurer_partner_id")
+  apiKey             String         @unique @map("api_key")
+  apiSecret          String         @map("api_secret")
+  webhookEndpoint    String?        @map("webhook_endpoint")
+  rateLimitRpm       Int            @default(600) @map("rate_limit_rpm")
+  isActive           Boolean        @default(true) @map("is_active")
+  lastUsedAt         DateTime?      @map("last_used_at")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  insurerPartner     InsurerPartner @relation(fields: [insurerPartnerId], references: [id], onDelete: Cascade)
+
+  @@index([insurerPartnerId])
+  @@index([apiKey])
+  @@map("insurer_api_credentials")
+}
+
+
 

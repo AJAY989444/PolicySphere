@@ -34,6 +34,19 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // Prisma database connection / cold-start timeouts
+  if (
+    err.name === 'PrismaClientInitializationError' ||
+    err.message?.includes("Can't reach database server") ||
+    err.message?.includes('ETIMEDOUT') ||
+    err.message?.includes('ECONNREFUSED')
+  ) {
+    return res.status(503).json({
+      success: false,
+      message: 'The database server is currently waking up from idle mode. Please retry in 5-10 seconds.',
+    });
+  }
+
   // Default
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({

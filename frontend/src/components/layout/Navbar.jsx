@@ -146,6 +146,24 @@ function Navbar({ onOpenSearch }) {
                   <span>📊</span> Reports & Tax
                 </NavLink>
               </li>
+              <li>
+                <NavLink
+                  to="/corporate"
+                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <span>🏢</span> Corporate
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/insurer"
+                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <span>🏛️</span> Insurers
+                </NavLink>
+              </li>
               {(user.role === 'ADVISOR' || user.role === 'ADMIN') && (
                 <>
                   <li>
