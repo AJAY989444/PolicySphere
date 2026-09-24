@@ -49,6 +49,9 @@ model User {
   auditLogs              AuditLog[]
   corporateAccounts      CorporateAccount[]
   corporateEmployees     CorporateEmployee[]
+  consents               UserConsent[]
+  erasureRequests        DataErasureRequest[]
+  fraudAssessments       FraudRiskAssessment[]
 
   @@map("users")
 }
@@ -603,6 +606,7 @@ enum FraudRiskLevel {
   LOW
   ELEVATED
   HIGH_RISK
+  CRITICAL
 }
 
 model AIAssessmentLog {
@@ -915,6 +919,14 @@ enum AuditAction {
   INSURER_UPDATED
   INSURER_STATUS_TOGGLED
   SYSTEM_SEED
+  DPDP_CONSENT_GRANTED
+  DPDP_CONSENT_REVOKED
+  DATA_ERASURE_REQUESTED
+  SECURITY_BREACH_DETECTED
+  DR_BACKUP_SNAPSHOT
+  DR_RESTORATION_SIMULATED
+  AUDIT_CHAIN_VERIFIED
+  INTEGRATION_VERIFIED
 }
 
 model AuditLog {
@@ -927,6 +939,8 @@ model AuditLog {
   userAgent     String?      @map("user_agent")
   previousValue Json?        @map("previous_value")
   newValue      Json?        @map("new_value")
+  previousHash  String?      @map("previous_hash")
+  recordHash    String?      @map("record_hash")
   status        String       @default("SUCCESS")
   createdAt     DateTime     @default(now()) @map("created_at")
 
@@ -1359,6 +1373,134 @@ model InsurerApiCredential {
   @@index([apiKey])
   @@map("insurer_api_credentials")
 }
+
+// ─── Module 26 & 27: DPDP Act (India) & Security Compliance ───
+
+enum ConsentPurpose {
+  MARKETING_COMMUNICATION
+  HEALTH_DATA_PROCESSING
+  INSURER_UNDERWRITING_SHARING
+  AUTO_DEBIT_RENEWAL
+  NOMINEE_DATA_ACCESS
+}
+
+enum ConsentStatus {
+  GRANTED
+  REVOKED
+}
+
+model UserConsent {
+  id         String         @id @default(cuid())
+  userId     String         @map("user_id")
+  purpose    ConsentPurpose
+  status     ConsentStatus  @default(GRANTED)
+  grantedAt  DateTime       @default(now()) @map("granted_at")
+  revokedAt  DateTime?      @map("revoked_at")
+  ipAddress  String?        @map("ip_address")
+  userAgent  String?        @map("user_agent")
+  version    String         @default("v2023.1")
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @updatedAt @map("updated_at")
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([purpose, status])
+  @@map("user_consents")
+}
+
+enum ErasureStatus {
+  PENDING_REVIEW
+  APPROVED_PURGED
+  REJECTED_LEGAL_RETENTION
+}
+
+model DataErasureRequest {
+  id             String        @id @default(cuid())
+  userId         String        @map("user_id")
+  status         ErasureStatus @default(PENDING_REVIEW)
+  reason         String
+  requestedAt    DateTime      @default(now()) @map("requested_at")
+  processedAt    DateTime?     @map("processed_at")
+  retentionNotes String?       @map("retention_notes")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("data_erasure_requests")
+}
+
+// ─── Module 33: Autonomous Fraud Detection Engine ──────────
+
+enum FraudDecision {
+  AUTO_CLEARED
+  FLAGGED_FOR_INVESTIGATION
+  BLOCKED_FRAUD
+}
+
+model FraudRiskAssessment {
+  id          String         @id @default(cuid())
+  claimId     String?        @map("claim_id")
+  userId      String         @map("user_id")
+  claimAmount Float          @default(0.0) @map("claim_amount")
+  riskScore   Int            @map("risk_score") // 0 to 100
+  riskLevel   FraudRiskLevel @map("risk_level")
+  signals     Json           @map("signals")
+  decision    FraudDecision  @default(AUTO_CLEARED)
+  assessedAt  DateTime       @default(now()) @map("assessed_at")
+
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([claimId])
+  @@index([riskLevel])
+  @@map("fraud_risk_assessments")
+}
+
+// ─── Module 34: Universal National Integrations & Geo Hospitals ─
+
+model NetworkHospital {
+  id                 String   @id @default(cuid())
+  name               String
+  rohiniCode         String?  @unique @map("rohini_code")
+  address            String
+  city               String
+  state              String
+  pincode            String
+  phone              String
+  cashlessDeskPhone  String?  @map("cashless_desk_phone")
+  rating             Float    @default(4.5)
+  specialties        Json     @default("[]")
+  tiers              Json     @default("[\"TIER_1\", \"TIER_2\"]")
+  latitude           Float?
+  longitude          Float?
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@index([city])
+  @@index([pincode])
+  @@map("network_hospitals")
+}
+
+model NationalVerificationLog {
+  id             String   @id @default(cuid())
+  userId         String?  @map("user_id")
+  serviceType    String   @map("service_type") // DIGILOCKER, PAN_NSDL, AADHAAR_EKYC, CKYC
+  identifierHash String   @map("identifier_hash")
+  status         String   // SUCCESS, FAILED
+  resultData     Json     @map("result_data")
+  verifiedAt     DateTime @default(now()) @map("verified_at")
+
+  @@index([serviceType])
+  @@index([identifierHash])
+  @@map("national_verification_logs")
+}
+
+
 
 
 

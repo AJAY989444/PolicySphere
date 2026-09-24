@@ -43,4 +43,9 @@ router.get('/audit-trail', roleGuard(['ADMIN']), GovernanceController.getAuditLo
 router.get('/settings', roleGuard(['ADMIN']), GovernanceController.getSettings);
 router.put('/settings/:key', roleGuard(['ADMIN']), GovernanceController.updateSetting);
 
+// Disaster Recovery & High Availability (SRS Module 31)
+router.get('/dr-status', roleGuard(['ADMIN']), GovernanceController.getDrStatus);
+router.post('/dr-backup', roleGuard(['ADMIN']), GovernanceController.triggerDrBackup);
+router.post('/dr-rehearsal', roleGuard(['ADMIN']), GovernanceController.simulateDrRehearsal);
+
 module.exports = router;

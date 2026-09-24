@@ -30,6 +30,10 @@ import SupportDeskPage from './pages/SupportDeskPage';
 import ReportsPage from './pages/ReportsPage';
 import CorporatePortalPage from './pages/CorporatePortalPage';
 import InsurerPortalPage from './pages/InsurerPortalPage';
+import DeveloperPortalPage from './pages/DeveloperPortalPage';
+import CompliancePrivacyPage from './pages/CompliancePrivacyPage';
+import HospitalLocatorPage from './pages/HospitalLocatorPage';
+import FutureInnovationsPage from './pages/FutureInnovationsPage';
 
 function App() {
   return (
@@ -46,6 +50,10 @@ function App() {
         <Route path="compare" element={<ComparePage />} />
         <Route path="smart-advisor" element={<SmartAdvisorPage />} />
         <Route path="support" element={<CustomerSupportPage />} />
+        <Route path="developers" element={<DeveloperPortalPage />} />
+        <Route path="privacy-center" element={<CompliancePrivacyPage />} />
+        <Route path="hospitals" element={<HospitalLocatorPage />} />
+        <Route path="innovations" element={<FutureInnovationsPage />} />
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>

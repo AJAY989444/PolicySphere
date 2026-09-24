@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: policysphere-ingress
+  namespace: policysphere
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "25m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: "policysphere-backend"
+spec:
+  tls:
+    - hosts:
+        - policysphere.com
+        - api.policysphere.com
+      secretName: policysphere-tls-certs
+  rules:
+    - host: policysphere.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: policysphere-backend
+                port:
+                  number: 5000
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: policysphere-backend
+                port:
+                  number: 5000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: policysphere-frontend
+                port:
+                  number: 80

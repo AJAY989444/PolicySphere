@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const AuditVaultService = require('./auditVault.service');
 
 class GovernanceService {
   /**
@@ -16,7 +17,7 @@ class GovernanceService {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 1. IMMUTABLE SECURITY AUDIT TRAIL ENGINE (SRS Section 36)
+  // 1. IMMUTABLE SECURITY AUDIT TRAIL ENGINE (SRS Section 35 & 36)
   // ─────────────────────────────────────────────────────────────
   static async recordAuditLog({
     userId = null,
@@ -28,25 +29,16 @@ class GovernanceService {
     newValue = null,
     status = 'SUCCESS',
   }) {
-    try {
-      const { ipAddress, userAgent } = this.getClientDetails(req);
-      return await prisma.auditLog.create({
-        data: {
-          userId,
-          action,
-          entityType,
-          entityId,
-          ipAddress,
-          userAgent,
-          previousValue: previousValue ? JSON.parse(JSON.stringify(previousValue)) : undefined,
-          newValue: newValue ? JSON.parse(JSON.stringify(newValue)) : undefined,
-          status,
-        },
-      });
-    } catch (err) {
-      console.error('Failed to write audit log:', err);
-      return null;
-    }
+    return await AuditVaultService.appendRecord({
+      userId,
+      action,
+      entityType,
+      entityId,
+      req,
+      previousValue,
+      newValue,
+      status,
+    });
   }
 
   static async getAuditLogs({

@@ -1,0 +1,24 @@
+# docker/prometheus/prometheus.yml
+# Prometheus APM Configuration (SRS Module 30)
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+  - job_name: 'policysphere-api'
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['backend:5000']
+        labels:
+          environment: 'production'
+          app: 'policysphere-core'
+
+  - job_name: 'policysphere-dev-local'
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:5000']
+        labels:
+          environment: 'local'
+          app: 'policysphere-core'

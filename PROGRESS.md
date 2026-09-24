@@ -579,6 +579,163 @@
   - 51/51 automated backend test assertions passed (100%) (`scratch/test-insurer-engine.js`).
   - Frontend production build verified (`npm run build`) with 0 errors in 4.79s.
 
+---
+
+## Point 23: API Standards, Enterprise Caching & Performance SLA (Modules 23, 24, 28)
+**Status:** Complete  
+**Date:** 2026-09-23
+
+### What was built
+- **OpenAPI 3.0 & Interactive Swagger Documentation (SRS Section 23)**:
+  - `backend/src/config/swagger.js`: Full OpenAPI 3.0 specification covering all PolicySphere microservices (Auth, Policies, Claims, Quotes, Proposals, Payments, CRM, Support, Governance, Corporate, Insurer).
+  - `backend/src/routes/docs.routes.js`: Exposes `/api/docs.json` (OpenAPI specification) and `/api/docs` (interactive, high-performance Scalar documentation interface).
+- **WebSocket Real-Time Gateway (SRS Section 23)**:
+  - `backend/src/services/websocket.service.js`: Bi-directional WebSocket server mounted on `ws://localhost:5000/ws` on the shared HTTP server.
+  - Features: Client connection handshakes (`SYSTEM_WELCOME`), heartbeat ping/pong, topic subscriptions (`channel:quotes`, `channel:claims`, `channel:crm`, `channel:broadcast`), and targeted user dispatch (`user:{id}`).
+- **Idempotency Key Middleware (SRS Section 23)**:
+  - `backend/src/middleware/idempotency.js`: Intercepts mutating payment and policy checkout operations (`POST /api/payments/checkout`). Prevents double-billing and duplicate creation upon client network retries with cached replays (`X-Idempotency-Status: HIT`, `_idempotentReplay: true`).
+- **Multi-Tier In-Memory Caching & Event Bus Architecture (SRS Section 24)**:
+  - `backend/src/services/cache.service.js`: TTL-based cache with tag-based invalidation (`invalidateTag('policies')`), `getOrSet()` query wrapper, and hit/miss statistics.
+  - `backend/src/services/eventBus.service.js`: In-process asynchronous event bus connecting domain events (`POLICY_PURCHASED`, `CLAIM_STATUS_UPDATED`) to WebSocket channels in real time.
+- **Performance SLA & Microsecond Latency Monitor (SRS Section 28)**:
+  - `backend/src/middleware/slaMonitor.js`: Response-time monitoring middleware evaluating API performance against Section 28 SLA rules (<200ms cached, <500ms normal REST, <5s quotes, <10s payments).
+  - Exposes `GET /api/performance/sla` returning p50, p90, p95, p99 latency percentiles, SLA compliance %, breach logs, and cache metrics.
+- **Frontend Developer Portal & API Gateway (`DeveloperPortalPage.jsx`, `DeveloperPortalPage.css`)**:
+  - Mounted at `/developers` with link in `Navbar.jsx`.
+  - 4 Interactive Hubs:
+    1. *OpenAPI & Swagger Specs*: Interactive endpoint test harness and fullscreen Scalar UI launcher.
+    2. *Real-Time WebSocket Console*: Connect/disconnect to `ws://localhost:5000/ws`, ping round-trip timer, channel subscriptions, and real-time packet stream terminal.
+    3. *Idempotency & Rate Shield*: Interactive simulation comparing initial request (`STORED`) vs duplicate retry (`HIT` cached replay) proving double-billing prevention.
+    4. *SLA & Performance Telemetry*: Live KPI dashboard with auto-pulse (3.5s), latency histograms, cache hit rate %, and Section 28 benchmark matrix.
+- **Verification**:
+  - 29/29 automated test assertions passed (100%) (`scratch/test-package1.js`).
+  - Production build verified (`npm run build`) with 0 errors in 8.09s.
+
+---
+
+## Point 24: Enterprise Security, DPDP Act & Autonomous Fraud Radar (Modules 26, 27, 33)
+**Status:** Complete  
+**Date:** 2026-09-24
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added enums `ConsentPurpose` (5 statutory purposes: `MARKETING_COMMUNICATION`, `HEALTH_DATA_PROCESSING`, `INSURER_UNDERWRITING_SHARING`, `AUTO_DEBIT_RENEWAL`, `NOMINEE_DATA_ACCESS`), `ConsentStatus` (`GRANTED`, `REVOKED`), `ErasureStatus` (`PENDING_REVIEW`, `APPROVED_PURGED`, `REJECTED_LEGAL_RETENTION`), `FraudDecision` (`AUTO_CLEARED`, `FLAGGED_FOR_INVESTIGATION`, `BLOCKED_FRAUD`), and updated `FraudRiskLevel` with `CRITICAL`.
+  - Added models `UserConsent`, `DataErasureRequest`, `FraudRiskAssessment` with relations to `User` and `Claim`.
+  - Migrated to Neon PostgreSQL (`npx prisma db push --accept-data-loss`) and generated Prisma Client v5.22.0.
+- **Enterprise Security Suite & ABAC (SRS Section 26)**:
+  - `backend/src/utils/cryptoVault.js`: AES-256-GCM authenticated encryption/decryption routines with HMAC authentication for sensitive PII.
+  - Regulatory PII Data Masking utilities for Aadhaar (`XXXX-XXXX-1234`), PAN (`ABCDE****F`), Phone (`+91 XXXXX-XX10`), Email (`j***e@example.com`), and Bank Accounts (`XXXX-XXXX-1234`).
+  - `backend/src/middleware/abac.js`: Attribute-Based Access Control evaluator evaluating Subject, Resource, Action, and Environment dynamic contexts beyond static RBAC (`CAN_ACCESS_CLAIM`, `CAN_PROCESS_HEALTH_DATA`, `CAN_DISBURSE_PAYOUT`, `CAN_REQUEST_ERASURE`).
+- **DPDP Act (India 2023) Digital Consent Vault & Portability (SRS Section 27)**:
+  - `backend/src/services/dpdpCompliance.service.js`:
+    - Full consent lifecycle management (purpose descriptions, grant/revocation timestamps, version tracking).
+    - Immutable compliance audit logging in `AuditLog` table.
+    - DPDP Section 12 Personal Data Dossier exporter with regulatory masked PII, policy list, claim records, and IRDAI 10-year statutory retention obligations.
+    - Right-to-Erasure submission workflow validating active claim dispute constraints.
+- **Autonomous Fraud Detection Engine (SRS Section 33)**:
+  - `backend/src/services/fraudDetection.service.js`:
+    - Multi-signal autonomous risk scoring evaluating IRDAI vigilance blacklisted hospital facilities, 30-day claim submission velocity, early inception anomalies (<15 days), disproportionate sum insured exhaustion (>85%), and missing invoice evidence.
+    - Calculates risk scores (0–100), risk tiers (`LOW`, `ELEVATED`, `HIGH_RISK`, `CRITICAL`), and decisions (`AUTO_CLEARED` vs `FLAGGED_FOR_INVESTIGATION`).
+    - Dispatches real-time `FRAUD_ALERT_TRIGGERED` domain events to WebSockets and event bus.
+- **Frontend Compliance & Privacy Center (`CompliancePrivacyPage.jsx`, `CompliancePrivacyPage.css`)**:
+  - Mounted at `/privacy-center` and linked in `Navbar.jsx`.
+  - 4 Interactive Hubs:
+    1. *DPDP Consent Vault*: Interactive toggle cards for all 5 statutory purposes with instant grant/revocation.
+    2. *Personal Data Dossier & Portability*: Instant generation of DPDP Section 12 JSON/CSV dossier with one-click download.
+    3. *Right to Erasure*: Account deletion request workflow with statutory legal retention caveats.
+    4. *Autonomous Fraud Detection Radar*: Real-time claim scanner with hospital blacklist detection, risk score meter (0–100), decision tags, and live PII masking sandbox.
+- **Verification**:
+  - 33/33 automated test assertions passed (100%) (`scratch/test-package2.js`).
+  - 29/29 regression test assertions passed (100%) (`scratch/test-package1.js`).
+  - Frontend production build verified (`npm run build`) with 0 errors in 4.10s.
+
+---
+
+## Point 25: Universal National Integrations Gateway & Cashless Hospital Network (Module 34 & 3)
+**Status:** Complete  
+**Date:** 2026-09-24
+
+### What was built
+- **Database Architecture (`backend/prisma/schema.prisma`)**:
+  - Added `NetworkHospital` model (ROHINI code, empanelment status, cashless desk hotline, specialties array, geographic lat/long, rating, NABH accreditation).
+  - Added `NationalVerificationLog` model (service type: `PAN_NSDL`, `AADHAAR_EKYC`, `DIGILOCKER`, `CKYC`, hashed identifier, success/failure status, audit payload).
+  - Pushed to Neon DB and regenerated Prisma Client v5.22.0.
+- **National Verification Gateway (`backend/src/services/integrations.service.js`)**:
+  - *DigiLocker Document Verification Gateway*: Zero-upload instant verification directly from DigiLocker repository under DPDP Act 2023 explicit digital consent (Aadhaar card, Driving License, Vehicle RC).
+  - *NSDL PAN Verification*: Real-time format validation against Income Tax Department standard `[A-Z]{5}[0-9]{4}[A-Z]{1}`, entity classification (Individual, Corporate, HUF, etc.), and active Aadhaar seeding status check.
+  - *UIDAI Aadhaar eKYC Gateway*: Two-factor OTP generation and authentication simulating UIDAI biometric authentication with automatic demographic profile extraction and regulatory cryptographic masking.
+  - *Central KYC (CKYC) Registry Synchronization*: 14-digit CKYC search returning CERSAI status, KIN level, and compliance score.
+  - *Cashless Hospital Network Locator & Pre-Authorization*: Geolocation distance calculation, ROHINI code search, specialty and city filters, and instant pre-auth eligibility evaluation with 2-hour turnaround guarantee and required document checklists.
+- **Backend API & Controller (`integrations.controller.js`, `integrations.routes.js`)**:
+  - Mounted at `/api/integrations`:
+    - `GET /api/integrations/digilocker/documents`
+    - `POST /api/integrations/nsdl/pan-verify`
+    - `POST /api/integrations/uidai/aadhaar-otp`
+    - `POST /api/integrations/uidai/aadhaar-verify`
+    - `POST /api/integrations/ckyc/lookup`
+    - `GET /api/integrations/hospitals`
+    - `POST /api/integrations/hospitals/:id/preauth-check`
+- **Frontend Cashless Hospital Network & Integrations Hub (`HospitalLocatorPage.jsx`, `HospitalLocatorPage.css`)**:
+  - Mounted at `/hospitals` with direct navigation link in `Navbar.jsx`.
+  - 5 Interactive Gateway Tabs:
+    1. *Cashless Hospital Network Locator*: Multi-filter search (city, specialty, keyword), distance tag, ROHINI code badge, 24x7 cashless desk hotlines, and instant Google Maps directions.
+    2. *Cashless Pre-Authorization Modal*: Real-time eligibility evaluation for admission procedure with 2-hour TAT guarantee and document checklists.
+    3. *DigiLocker Document Vault*: DPDP consent-backed pull of authenticated government documents.
+    4. *NSDL Instant PAN Verification*: Live validation with entity categorization and Aadhaar linking check.
+    5. *UIDAI Aadhaar eKYC*: OTP dispatch & authenticated profile retriever.
+    6. *CKYC Central Registry*: 14-digit registry lookup with compliance scoring.
+- **Verification**:
+  - 28/28 automated test assertions passed (100%) (`scratch/test-package3.js`).
+  - Frontend production build verified (`npm run build`) with 0 errors in 12.63s.
+
+---
+
+## Point 26: Cloud Native Infra, APM Prometheus, DR Backups & SHA-256 Audit Vault (Modules 25, 30, 31, 35, 36)
+**Status:** Complete  
+**Date:** 2026-09-24
+
+### What was built
+- **Module 35: SHA-256 Immutable Audit Vault & Non-Repudiation Logging**:
+  - Database schema updated with `previousHash` and `recordHash` fields on `AuditLog` model and extended `AuditAction` enum with statutory compliance values (`DPDP_CONSENT_GRANTED`, `DPDP_CONSENT_REVOKED`, `DATA_ERASURE_REQUESTED`, `DR_BACKUP_SNAPSHOT`, `DR_RESTORATION_SIMULATED`, `AUDIT_CHAIN_VERIFIED`, etc.).
+  - `backend/src/services/auditVault.service.js`:
+    - Cryptographic blockchain/ledger style chaining with Genesis Hash `0000000000000000000000000000000000000000000000000000000000000000`.
+    - Canonical deterministic JSON serialization (`canonicalJson`) guaranteeing mathematical consistency across PostgreSQL JSONB field storage.
+    - `appendRecord()` automatically links every audit event to the prior block's hash.
+    - `verifyChainIntegrity()` sequentially recalculates hashes for all records and mathematical proof of zero tampering.
+  - Verification endpoint mounted at `GET /api/compliance/audit/verify-chain`.
+- **Module 30: APM Observability & Prometheus Exporter**:
+  - `backend/src/middleware/metrics.js`: Captures `http_requests_total`, `http_request_duration_seconds` histogram buckets, Node.js heap memory, process uptime, CPU load average, and active audit ledger counts.
+  - Mounted at `GET /api/metrics` and `GET /metrics` in standard Prometheus open metrics text format (`text/plain; version=0.0.4`).
+  - `docker/prometheus/prometheus.yml`: Configured scrape jobs for production container and local host environments.
+  - `docker/grafana/dashboards/policysphere-overview.json`: Complete Grafana dashboard definition with panels for HTTP throughput, p95 latency, heap memory, and ledger metrics.
+  - Provisioning automation in `docker/grafana/provisioning/`.
+- **Module 31: Disaster Recovery (DR), High Availability & Automated Backups**:
+  - `backend/src/services/drBackup.service.js`:
+    - RPO Target: 15 minutes; RTO Target: 60 minutes.
+    - Automated snapshot generator creating point-in-time encrypted archives with SHA-256 checksums.
+    - Automated restore rehearsal simulator validating all 5 restoration stages (container spawn, KMS handshake, schema validation, audit ledger check, sanity health check) with sub-minute RTO.
+    - DR health status reporting active-standby replication between AWS Mumbai (`ap-south-1`) and Hyderabad (`ap-south-2`).
+  - Mounted at `GET /api/governance/dr-status`, `POST /api/governance/dr-backup`, `POST /api/governance/dr-rehearsal`.
+- **Module 36: Security Hardening & Zero-Trust Defense**:
+  - `backend/src/middleware/securityHeaders.js`:
+    - HSTS: `max-age=31536000; includeSubDomains; preload`
+    - X-Frame-Options: `SAMEORIGIN`
+    - X-Content-Type-Options: `nosniff`
+    - Referrer-Policy: `strict-origin-when-cross-origin`
+    - Cross-Origin-Opener-Policy & Cross-Origin-Resource-Policy
+    - Permissions-Policy restricting microphone, camera, usb, accelerometer.
+    - Comprehensive Content Security Policy (CSP).
+- **Module 25: Cloud-Native Containerization & Kubernetes**:
+  - `backend/Dockerfile`: Multi-stage build with Alpine Linux, non-root user `node`, Prisma client generation, and health check.
+  - `frontend/Dockerfile` & `frontend/nginx.conf`: Multi-stage Vite build with Nginx Alpine reverse proxy for SPA routing, gzip compression, and API/WS proxying.
+  - `docker-compose.yml`: Multi-container stack (backend, frontend, postgres, redis, prometheus, grafana).
+  - Complete Kubernetes manifests (`k8s/`): `namespace.yaml`, `configmap.yaml`, `secrets.yaml`, `backend-deployment.yaml` (with liveness/readiness probes), `frontend-deployment.yaml`, `ingress.yaml` (with TLS and WebSocket support), and `hpa.yaml` (HorizontalPodAutoscaler targeting 70% CPU / 80% RAM).
+- **Verification**:
+  - 42/42 automated test assertions passed (100%) (`scratch/test-package4.js`).
+  - 132/132 cumulative tests passing across all packages (100%).
+
+
+
 
 
 

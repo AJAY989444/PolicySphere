@@ -89,6 +89,42 @@ function Navbar({ onOpenSearch }) {
               <span>🎧</span> Support
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="/developers"
+              className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span>⚡</span> Developers
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/privacy-center"
+              className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span>🛡️</span> Privacy & DPDP
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/hospitals"
+              className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span>🏥</span> Hospitals
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/innovations"
+              className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span>🚀</span> Innovations
+            </NavLink>
+          </li>
           {user && (
 
             <>

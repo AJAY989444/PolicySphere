@@ -214,6 +214,38 @@ class GovernanceController {
       next(err);
     }
   }
+
+  // 8. Disaster Recovery & High Availability (SRS Module 31)
+  static async getDrStatus(req, res, next) {
+    try {
+      const DrBackupService = require('../services/drBackup.service');
+      const status = await DrBackupService.getDrHealthStatus();
+      res.json({ success: true, data: status });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async triggerDrBackup(req, res, next) {
+    try {
+      const DrBackupService = require('../services/drBackup.service');
+      const snapshot = await DrBackupService.createBackupSnapshot('MANUAL_ADMIN_TRIGGER');
+      res.json({ success: true, data: snapshot });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async simulateDrRehearsal(req, res, next) {
+    try {
+      const DrBackupService = require('../services/drBackup.service');
+      const { snapshotId } = req.body;
+      const rehearsal = await DrBackupService.simulateRestoreRehearsal(snapshotId);
+      res.json({ success: true, data: rehearsal });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = GovernanceController;
